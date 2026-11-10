@@ -1,9 +1,10 @@
 "use client";
 
 import { create } from "zustand";
+import { unlock } from "./achievements";
 import { useWindows } from "./windows";
 
-export type PowerState = "booting" | "on" | "shutting-down" | "off";
+export type PowerState = "booting" | "on" | "locked" | "shutting-down" | "off";
 
 interface PowerStore {
   state: PowerState;
@@ -13,12 +14,26 @@ interface PowerStore {
   restart: () => void;
   shutdown: () => void;
   powerOn: () => void;
+  /** What the locked state shows first: the screensaver (idle) or the lock screen (manual). */
+  lockPhase: "saver" | "lock";
+  lock: (phase?: "saver" | "lock") => void;
+  unlockScreen: () => void;
 }
 
-export const usePower = create<PowerStore>()((set) => ({
+let wasOff = false;
+
+export const usePower = create<PowerStore>()((set, get) => ({
   state: "booting",
   fullBoot: false,
-  bootDone: () => set({ state: "on", fullBoot: false }),
+  lockPhase: "lock",
+  bootDone: () => {
+    set({ state: "on", fullBoot: false });
+    unlock("moonrise");
+    if (wasOff) {
+      wasOff = false;
+      unlock("power-cycle");
+    }
+  },
   restart: () => {
     useWindows.getState().closeAll();
     set({ state: "booting", fullBoot: true });
@@ -28,5 +43,15 @@ export const usePower = create<PowerStore>()((set) => ({
     set({ state: "shutting-down" });
     setTimeout(() => set({ state: "off" }), 2200);
   },
-  powerOn: () => set({ state: "booting", fullBoot: false }),
+  powerOn: () => {
+    wasOff = true;
+    set({ state: "booting", fullBoot: false });
+  },
+  // Locking keeps windows open; the desktop stays mounted underneath the lock screen.
+  lock: (phase = "lock") => {
+    if (get().state === "on") set({ state: "locked", lockPhase: phase });
+  },
+  unlockScreen: () => {
+    if (get().state === "locked") set({ state: "on" });
+  },
 }));

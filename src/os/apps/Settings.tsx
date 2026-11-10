@@ -197,6 +197,8 @@ function SoundMotion() {
   const setReduceMotion = useSettings((s) => s.setReduceMotion);
   const customCursor = useSettings((s) => s.customCursor);
   const setCustomCursor = useSettings((s) => s.setCustomCursor);
+  const saver = useSettings((s) => s.screensaverMinutes);
+  const setSaver = useSettings((s) => s.setScreensaverMinutes);
   return (
     <>
       <Group title="Sound">
@@ -217,6 +219,23 @@ function SoundMotion() {
           checked={customCursor}
           onChange={setCustomCursor}
         />
+      </Group>
+      <Group title="Screensaver" hint="A drifting moon after you've been idle, then the lock screen.">
+        <div className="flex max-w-lg flex-wrap gap-2">
+          {[0, 1, 3, 5, 10].map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={saver === m}
+              onClick={() => setSaver(m)}
+              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                saver === m ? "border-accent bg-accent/15 text-fg" : "border-line text-muted hover:text-fg"
+              }`}
+            >
+              {m === 0 ? "Never" : `${m} min`}
+            </button>
+          ))}
+        </div>
       </Group>
       <Group title="Motion">
         <Toggle

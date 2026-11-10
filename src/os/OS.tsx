@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Boot } from "./components/Boot";
+import { LockScreen } from "./components/LockScreen";
 import { LogoMark } from "./components/Logo";
 import { ContentProvider } from "./content/ContentProvider";
 import type { OSContent } from "./content/types";
@@ -66,7 +67,8 @@ export function OS({ content }: { content: OSContent }) {
         ) : (
           <div className="fixed inset-0 bg-[#030409]" />
         ))}
-      {power === "on" && (isPhone ? <Phone /> : <Desktop />)}
+      {(power === "on" || power === "locked") && (isPhone ? <Phone /> : <Desktop />)}
+      <AnimatePresence>{power === "locked" && <LockScreen key="lock" />}</AnimatePresence>
       <AnimatePresence>
         {(power === "shutting-down" || power === "off") && <PowerOff key="off" off={power === "off"} />}
       </AnimatePresence>
