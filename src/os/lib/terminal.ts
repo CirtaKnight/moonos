@@ -1,4 +1,5 @@
 import type { OSContent, Project, ProjectItem } from "../content/types";
+import { splitTimeline } from "./agenda";
 import { moonIllumination, moonPhase, moonPhaseName } from "./moon";
 
 export type Tone = "default" | "muted" | "accent" | "success" | "error" | "gold";
@@ -137,6 +138,7 @@ export const COMMANDS: Record<string, string> = {
   echo: "print text",
   history: "command history",
   clear: "clear the screen",
+  agenda: "past & upcoming events",
   trophies: "your achievements",
   reboot: "restart the OS",
   exit: "close the terminal",
@@ -343,6 +345,18 @@ export function runCommand(
       say("Smooth. Very smooth.", "muted");
       effects.push({ type: "achievement", id: "moonwalk" });
       break;
+    case "agenda":
+    case "cal": {
+      const today = new Date();
+      const { upcoming, past } = splitTimeline(content.events, ctx.now ?? today);
+      if (!content.events.length) say("Nothing on the agenda yet.", "muted");
+      if (upcoming.length) say("Upcoming:", "accent");
+      for (const e of upcoming.slice(0, 6)) say(`  ${e.start.slice(0, 10)}  ${e.title}${e.location ? ` — ${e.location}` : ""}`);
+      if (past.length) say("Recently:", "accent");
+      for (const e of past.slice(0, 4)) say(`  ${e.start.slice(0, 10)}  ${e.title}`, "muted");
+      if (args[0] === "open" || content.events.length) say("Open the calendar with `open agenda`.", "muted");
+      break;
+    }
     case "trophies":
     case "achievements":
       effects.push({ type: "openApp", app: "trophies" });

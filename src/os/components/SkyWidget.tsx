@@ -1,9 +1,10 @@
 "use client";
 
-import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Sun } from "lucide-react";
+import { CalendarDays, Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useContent } from "../content/ContentProvider";
 import { useNow } from "../hooks";
+import { relativeDay, splitTimeline } from "../lib/agenda";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
 import { useSettings } from "../store/settings";
 import { MoonGlyph } from "./MoonGlyph";
@@ -29,7 +30,7 @@ function describe(code: number) {
 
 /** Desktop widget: tonight's moon, plus live weather when a city is set in the admin. */
 export function SkyWidget() {
-  const { settings } = useContent();
+  const { settings, events } = useContent();
   const city = settings.weatherCity;
   const now = useNow(60_000);
   const layout = useSettings((s) => s.layout);
@@ -59,6 +60,7 @@ export function SkyWidget() {
   if (!now) return null;
   const phase = moonPhase(now);
   const w = weather ? describe(weather.code) : null;
+  const next = splitTimeline(events, now).upcoming[0];
 
   return (
     <aside
@@ -81,6 +83,15 @@ export function SkyWidget() {
               {Math.round(weather.temp)}° <span className="font-normal text-muted">{w.label}</span>
             </p>
             <p className="truncate text-xs text-muted">{city.name}</p>
+          </div>
+        </div>
+      )}
+      {next && (
+        <div className="flex items-center gap-3 border-t border-line pt-3">
+          <CalendarDays size={22} strokeWidth={1.5} className="shrink-0 text-[#f0c987]" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-fg">{next.title}</p>
+            <p className="text-xs text-muted">Next up · {relativeDay(next.start, now)}</p>
           </div>
         </div>
       )}
