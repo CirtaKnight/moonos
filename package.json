@@ -29,6 +29,7 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.16.6",
     "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@testing-library/react": "^16.3.3",
