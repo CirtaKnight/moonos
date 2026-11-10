@@ -18,6 +18,16 @@ export interface ProjectItem {
   height?: number;
 }
 
+export interface RepoStats {
+  url: string;
+  fullName: string;
+  description?: string;
+  stars?: number;
+  forks?: number;
+  language?: string;
+  pushedAt?: string;
+}
+
 export interface Project {
   id: string;
   slug: string;
@@ -32,6 +42,8 @@ export interface Project {
   archived: boolean;
   publishedAt?: string;
   items: ProjectItem[];
+  /** GitHub repository, with live stats when available. */
+  repo?: RepoStats;
 }
 
 export interface MediaEntry {
@@ -79,6 +91,8 @@ export interface Profile {
   email?: string;
   cvUrl?: string;
   available?: boolean;
+  /** GitHub account used for the live activity feed. */
+  githubUsername?: string;
 }
 
 export interface Wallpaper {

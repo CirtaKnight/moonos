@@ -26,6 +26,8 @@ export interface WindowInstance {
   minimized: boolean;
   maximized: boolean;
   snap: Snap;
+  /** "Always on top". */
+  pinned?: boolean;
 }
 
 export interface OpenOptions {
@@ -60,6 +62,7 @@ interface WindowsState {
   snapTo: (id: string, snap: Snap) => void;
   /** Click on a taskbar/dock entry: focus, restore, or minimize if already focused. */
   activate: (id: string) => void;
+  togglePin: (id: string) => void;
 }
 
 const MIN_W = 300;
@@ -203,6 +206,9 @@ export const useWindows = create<WindowsState>()((set, get) => ({
     set({
       windows: get().windows.map((w) => (w.id === id ? { ...w, snap, maximized: false } : w)),
     }),
+
+  togglePin: (id) =>
+    set({ windows: get().windows.map((w) => (w.id === id ? { ...w, pinned: !w.pinned } : w)) }),
 
   activate: (id) => {
     const { windows, focusedId } = get();

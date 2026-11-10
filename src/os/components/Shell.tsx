@@ -4,6 +4,8 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp } from "../apps/launch";
+import { dockMenu } from "../menus";
+import { contextMenuProps } from "../store/contextMenu";
 import { useUI } from "../store/ui";
 import { useWindows, type WindowInstance } from "../store/windows";
 import { AppIcon } from "./AppIcon";
@@ -161,6 +163,7 @@ function DockItem({
         type="button"
         aria-label={app.name}
         data-dock={appId}
+        onContextMenu={contextMenuProps(() => dockMenu(appId)).onContextMenu}
         onHoverStart={() => setHover(true)}
         onHoverEnd={() => setHover(false)}
         whileHover={{ y: -6, scale: 1.12 }}
@@ -206,6 +209,7 @@ export function Taskbar() {
               aria-label={app.name}
               title={app.name}
               data-dock={entry.appId}
+              onContextMenu={contextMenuProps(() => dockMenu(entry.appId)).onContextMenu}
               onClick={(e) => {
                 e.stopPropagation();
                 activateEntry(entry);

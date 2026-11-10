@@ -14,12 +14,18 @@ import {
   Trash2,
   UserRound,
   Eye,
+  Info as InfoIcon,
+  CalendarDays,
+  Trophy,
+  Joystick,
 } from "lucide-react";
 import { About } from "./About";
 import { Browser } from "./Browser";
 import { CV } from "./CV";
 import { Folder as FolderApp } from "./Folder";
+import { Info } from "./Info";
 import { Gallery, Videos } from "./Media";
+import { Soon } from "./Soon";
 import { Game } from "./Game";
 import { Mail as MailApp } from "./Mail";
 import { Music } from "./Music";
@@ -47,6 +53,10 @@ export const APP_IDS = [
   "game",
   "settings",
   "bin",
+  "info",
+  "games",
+  "agenda",
+  "trophies",
 ] as const;
 export type AppId = (typeof APP_IDS)[number];
 
@@ -66,6 +76,10 @@ export const apps: Record<AppId, AppDefinition> = {
   game: { id: "game", name: "Lunar Drift", icon: Gamepad2, tint: "#a6e3e8", component: Game, size: { w: 560, h: 600 }, listed: true, pinned: false, description: "A tiny game" },
   settings: { id: "settings", name: "Settings", icon: Settings2, tint: "#b8bfcc", component: Settings, size: { w: 700, h: 500 }, listed: true, pinned: true },
   bin: { id: "bin", name: "Recycle Bin", icon: Trash2, tint: "#b8bfcc", component: Bin, size: { w: 720, h: 460 }, listed: false, pinned: false },
+  info: { id: "info", name: "Get info", icon: InfoIcon, tint: "#bccbeb", component: Info, size: { w: 420, h: 440 }, listed: false, pinned: false },
+  games: { id: "games", name: "Games", icon: Joystick, tint: "#a6e3e8", component: Soon, size: { w: 640, h: 480 }, listed: true, pinned: false, description: "Small original games" },
+  agenda: { id: "agenda", name: "Agenda", icon: CalendarDays, tint: "#f0c987", component: Soon, size: { w: 860, h: 580 }, listed: true, pinned: true, description: "Projects, events & hackathons" },
+  trophies: { id: "trophies", name: "Trophies", icon: Trophy, tint: "#c8a96f", component: Soon, size: { w: 720, h: 560 }, listed: true, pinned: false, description: "Achievements & secrets" },
 };
 
 export function getApp(id: string): AppDefinition {

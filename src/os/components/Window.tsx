@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Minus, Square, Copy, X } from "lucide-react";
+import { Minus, Pin, Square, Copy, X } from "lucide-react";
 import { memo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { getApp } from "../apps/registry";
+import { windowMenu } from "../menus";
+import { useContextMenu } from "../store/contextMenu";
 import { useUI } from "../store/ui";
 import {
   effectiveRect,
@@ -154,7 +156,7 @@ function WindowFrame({ win }: { win: WindowInstance }) {
       } ${isFull ? "rounded-none sm:rounded-lg" : "rounded-xl"} ${
         interacting ? "" : "transition-[left,top,width,height] duration-200 ease-out"
       } ${win.minimized ? "pointer-events-none" : "pointer-events-auto"}`}
-      style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex: win.z }}
+      style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex: win.z + (win.pinned ? 100_000 : 0) }}
     >
       {/* Title bar */}
       <div
@@ -162,12 +164,18 @@ function WindowFrame({ win }: { win: WindowInstance }) {
         onDoubleClick={(e) => {
           if (!(e.target as HTMLElement).closest("button")) toggleMaximize(win.id);
         }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          useContextMenu.getState().open(e.clientX, e.clientY, windowMenu(win));
+        }}
         className={`flex h-10 shrink-0 cursor-default touch-none items-center gap-2.5 border-b border-line pr-1.5 pl-3 ${
           focused ? "text-fg" : "text-muted"
         }`}
       >
         <AppIcon icon={app.icon} tint={app.tint} size={20} />
         <h2 className="min-w-0 flex-1 truncate text-[13px] font-medium tracking-tight">{win.title}</h2>
+        {win.pinned && <Pin size={12} className="shrink-0 text-accent" aria-label="Always on top" />}
         <div className="flex items-center gap-0.5">
           <TitleButton label="Minimize" onClick={() => minimize(win.id)}>
             <Minus size={14} />
