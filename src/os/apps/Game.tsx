@@ -4,6 +4,7 @@ import { Play, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { newGame, PLAYER_HALF_W, PLAYER_Y, step, type GameState } from "../lib/lunarDrift";
 import { play } from "../lib/sound";
+import { unlock } from "../store/achievements";
 import { useWindows } from "../store/windows";
 import type { AppProps } from "./types";
 
@@ -70,6 +71,10 @@ export function Game({ windowId }: AppProps) {
       stateRef.current = s;
       if (s.status === "playing" && s.lives < lastLives) play("error");
       lastLives = s.lives;
+      if (s.score !== before.score) {
+        if (s.score >= 50) unlock("drift-50");
+        if (s.score >= 150) unlock("drift-150");
+      }
       if (s.score !== before.score || s.status !== before.status) {
         if (s.status === "over" && before.status === "playing") {
           const best = Math.max(readBest(), s.score);
