@@ -2,9 +2,11 @@
 
 import { Calendar, Check, ExternalLink, Link2 } from "lucide-react";
 import { useState } from "react";
+import { siGithub } from "simple-icons";
 import { FolderIcon } from "../components/AppIcon";
 import { FileThumb, kindLabel } from "../components/FileIcons";
 import { useContent } from "../content/ContentProvider";
+import { timeAgo } from "../lib/github";
 import { openItem } from "./launch";
 import type { AppProps } from "./types";
 import { EmptyState, Scroll, Tag, formatMonth } from "./ui";
@@ -50,6 +52,25 @@ export function Folder({ params }: AppProps) {
             </div>
           </div>
         </div>
+        {project.repo && (
+          <a
+            href={project.repo.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative mx-5 mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs text-muted transition-colors hover:border-accent/50 sm:mx-6"
+          >
+            <span className="flex items-center gap-1.5 font-medium text-fg">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d={siGithub.path} />
+              </svg>
+              {project.repo.fullName}
+            </span>
+            {project.repo.stars != null && <span>★ {project.repo.stars}</span>}
+            {project.repo.language && <span>{project.repo.language}</span>}
+            {project.repo.pushedAt && <span>Updated {timeAgo(project.repo.pushedAt)}</span>}
+            <ExternalLink size={12} className="ml-auto" />
+          </a>
+        )}
         {project.description && (
           <p className="relative max-w-3xl px-5 pb-5 text-[14px] leading-relaxed whitespace-pre-line text-fg/90 sm:px-6">
             {project.description}
