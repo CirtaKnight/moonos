@@ -90,6 +90,12 @@ export const project = defineType({
     defineField({ name: "description", type: "text", rows: 5 }),
     defineField({ name: "tags", type: "array", of: [{ type: "string" }], options: { layout: "tags" } }),
     defineField({ name: "date", type: "date", options: { dateFormat: "MMMM YYYY" } }),
+    defineField({
+      name: "repo",
+      title: "GitHub repository",
+      type: "url",
+      description: "Optional. Shows live stars, language and last update in the folder.",
+    }),
     defineField({ name: "cover", title: "Cover image", type: "image", options: { hotspot: true } }),
     defineField({
       name: "color",

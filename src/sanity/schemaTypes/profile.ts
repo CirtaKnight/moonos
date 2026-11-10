@@ -36,6 +36,12 @@ export const profile = defineType({
     }),
     defineField({ name: "location", type: "string" }),
     defineField({
+      name: "githubUsername",
+      title: "GitHub username",
+      type: "string",
+      description: "Your public GitHub activity (commits, new repos, releases) appears as notifications.",
+    }),
+    defineField({
       name: "email",
       type: "string",
       description: "Optional. Shown publicly in About me. Leave empty to only use the contact form.",

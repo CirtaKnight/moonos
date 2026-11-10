@@ -114,3 +114,75 @@ export const siteSettings = defineType({
   ],
   preview: { prepare: () => ({ title: "Site settings" }) },
 });
+
+export const announcement = defineType({
+  name: "announcement",
+  title: "Announcements (notifications)",
+  type: "document",
+  description: "Shown as a notification to visitors — e.g. a new LinkedIn post, a certificate or an award.",
+  fields: [
+    defineField({ name: "title", type: "string", validation: (r) => r.required() }),
+    defineField({ name: "body", title: "Text", type: "string" }),
+    defineField({ name: "url", title: "Link", type: "url", description: "e.g. your LinkedIn post." }),
+    defineField({ name: "linkLabel", title: "Link label", type: "string", initialValue: "Open" }),
+    defineField({
+      name: "source",
+      title: "Icon",
+      type: "string",
+      options: {
+        list: [
+          { title: "LinkedIn", value: "linkedin" },
+          { title: "GitHub", value: "github" },
+          { title: "Trophy / award", value: "trophy" },
+          { title: "Calendar / event", value: "calendar" },
+          { title: "Star", value: "star" },
+          { title: "MoonOS", value: "generic" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "linkedin",
+    }),
+    defineField({ name: "publishedAt", title: "Publish date", type: "datetime", initialValue: () => new Date().toISOString(), validation: (r) => r.required() }),
+    defineField({ name: "expiresAt", title: "Hide after", type: "datetime", description: "Optional." }),
+  ],
+  orderings: [{ title: "Newest", name: "newest", by: [{ field: "publishedAt", direction: "desc" }] }],
+  preview: { select: { title: "title", subtitle: "body" } },
+});
+
+export const agendaEvent = defineType({
+  name: "event",
+  title: "Agenda",
+  type: "document",
+  fields: [
+    defineField({ name: "title", type: "string", validation: (r) => r.required() }),
+    defineField({
+      name: "kind",
+      title: "Type",
+      type: "string",
+      options: {
+        list: [
+          { title: "Project", value: "project" },
+          { title: "Event", value: "event" },
+          { title: "Hackathon", value: "hackathon" },
+          { title: "Competition", value: "competition" },
+          { title: "Talk / workshop", value: "talk" },
+          { title: "Exam", value: "exam" },
+          { title: "Other", value: "other" },
+        ],
+      },
+      initialValue: "event",
+      validation: (r) => r.required(),
+    }),
+    defineField({ name: "start", type: "date", validation: (r) => r.required() }),
+    defineField({ name: "end", type: "date", description: "Optional, for multi-day items." }),
+    defineField({ name: "location", type: "string" }),
+    defineField({ name: "url", title: "Link", type: "url" }),
+    defineField({ name: "description", type: "text", rows: 3 }),
+    defineField({ name: "project", title: "Related project", type: "reference", to: [{ type: "project" }] }),
+  ],
+  orderings: [{ title: "Date", name: "date", by: [{ field: "start", direction: "desc" }] }],
+  preview: {
+    select: { title: "title", start: "start", kind: "kind" },
+    prepare: ({ title, start, kind }) => ({ title, subtitle: [start, kind].filter(Boolean).join(" · ") }),
+  },
+});
