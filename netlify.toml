@@ -1,0 +1,9 @@
+# Netlify build settings. The Next.js runtime (OpenNext adapter) is applied automatically
+# for `.next` publish directories; nothing here is Netlify-specific in the app code.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+  NEXT_TELEMETRY_DISABLED = "1"
