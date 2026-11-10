@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "CirtaKnight OS — a portfolio that boots like an operating system";
+export const alt = "MoonOS — a portfolio that boots like an operating system";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,13 +26,13 @@ export default function OpengraphImage() {
         </svg>
         <div style={{ display: "flex", flexDirection: "column", marginLeft: 60 }}>
           <div style={{ fontSize: 76, letterSpacing: 18, display: "flex" }}>
-            CIRTA<span style={{ color: "#bccbeb" }}>KNIGHT</span>
+            MOON<span style={{ color: "#bccbeb" }}>OS</span>
           </div>
           <div style={{ fontSize: 30, color: "#8c94a8", marginTop: 18, fontFamily: "monospace" }}>
             $ boot portfolio --os
           </div>
           <div style={{ fontSize: 30, color: "#bccbeb", marginTop: 10, fontFamily: "sans-serif" }}>
-            Computer Science Engineering Student
+            by CirtaKnight · Computer Science Engineering Student
           </div>
         </div>
       </div>

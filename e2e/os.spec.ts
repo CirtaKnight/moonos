@@ -61,12 +61,12 @@ test.describe("desktop", () => {
     await page.keyboard.press("Control+k");
     await page.getByRole("dialog", { name: "Search" }).getByLabel("Search").fill("cirta");
     await page.keyboard.press("Enter");
-    await expect(page.getByRole("dialog", { name: "CirtaKnight OS" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "MoonOS" })).toBeVisible();
   });
 
   test("deep link opens a project", async ({ page }) => {
-    await boot(page, "/?open=project/cirtaknight-os");
-    await expect(page.getByRole("dialog", { name: "CirtaKnight OS" })).toBeVisible();
+    await boot(page, "/?open=project/moonos");
+    await expect(page.getByRole("dialog", { name: "MoonOS" })).toBeVisible();
   });
 });
 

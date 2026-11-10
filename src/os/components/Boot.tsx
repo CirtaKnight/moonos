@@ -109,7 +109,7 @@ export function Boot({
     <div
       className="fixed inset-0 z-[100] bg-[#030409] text-[#c9cfdc]"
       role="status"
-      aria-label="CirtaKnight OS is booting. Press any key to skip."
+      aria-label="MoonOS is booting. Press any key to skip."
     >
       <AnimatePresence mode="wait">
         {phase === "log" ? (

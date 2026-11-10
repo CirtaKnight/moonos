@@ -9,8 +9,8 @@ import { structure } from "./src/sanity/structure";
 const singletons = new Set<string>(SINGLETONS);
 
 export default defineConfig({
-  name: "cirtaknight-os",
-  title: "CirtaKnight OS · Admin",
+  name: "moonos",
+  title: "MoonOS · Admin",
   basePath: "/admin",
   projectId,
   dataset,

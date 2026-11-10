@@ -32,9 +32,9 @@ describe("terminal", () => {
     const cd = run("cd projects");
     expect(cd.cwd).toEqual(["projects"]);
     expect(promptPath(cd.cwd)).toBe("~/projects");
-    expect(text(run("ls", cd.cwd))).toContain("cirtaknight-os/");
+    expect(text(run("ls", cd.cwd))).toContain("moonos/");
     expect(run("cd ..", ["projects"]).cwd).toEqual([]);
-    expect(run("cd ~", ["projects", "cirtaknight-os"]).cwd).toEqual([]);
+    expect(run("cd ~", ["projects", "moonos"]).cwd).toEqual([]);
   });
 
   it("hides archived projects", () => {
@@ -43,15 +43,15 @@ describe("terminal", () => {
   });
 
   it("cats notes and refuses directories", () => {
-    expect(text(run("cat projects/cirtaknight-os/README.txt"))).toContain("CirtaKnight OS");
+    expect(text(run("cat projects/moonos/README.txt"))).toContain("MoonOS");
     expect(run("cat projects").lines[0].tone).toBe("error");
   });
 
   it("opens projects, files and apps through effects", () => {
-    expect(run("open cirtaknight-os").effects[0]).toMatchObject({ type: "openProject", slug: "cirtaknight-os" });
-    expect(run("open projects/cirtaknight-os").effects[0]).toMatchObject({ type: "openProject" });
+    expect(run("open moonos").effects[0]).toMatchObject({ type: "openProject", slug: "moonos" });
+    expect(run("open projects/moonos").effects[0]).toMatchObject({ type: "openProject" });
     expect(run("open resume").effects[0]).toEqual({ type: "openApp", app: "cv" });
-    expect(run("open projects/cirtaknight-os/README.txt").effects[0]).toMatchObject({ type: "openItem" });
+    expect(run("open projects/moonos/README.txt").effects[0]).toMatchObject({ type: "openItem" });
   });
 
   it("reports unknown commands", () => {
@@ -74,6 +74,6 @@ describe("terminal", () => {
   it("completes commands and paths", () => {
     expect(complete("who", { content, cwd: [] })).toEqual(["whoami"]);
     expect(complete("cd pro", { content, cwd: [] })).toEqual(["projects/"]);
-    expect(complete("cat projects/cirt", { content, cwd: [] })).toEqual(["projects/cirtaknight-os/"]);
+    expect(complete("cat projects/moo", { content, cwd: [] })).toEqual(["projects/moonos/"]);
   });
 });

@@ -1,4 +1,4 @@
-# CirtaKnight OS
+# MoonOS
 
 A portfolio that boots like an operating system. Visitors land on a typed kernel log, watch a crescent logo ink itself in, then explore a desktop where **every folder is a project** — with windows, a terminal, a browser of socials, a phone mode for mobile, and a tiny game.
 

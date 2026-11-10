@@ -21,7 +21,7 @@ export function scoreText(query: string, text: string | undefined): number {
   if (t.startsWith(q)) return 80;
   if (t.split(/[\s\-_./]+/).some((w) => w.startsWith(q))) return 60;
   if (t.includes(q)) return 40;
-  // Subsequence (e.g. "ckos" → "CirtaKnight OS")
+  // Subsequence (e.g. "ckos" → "MoonOS")
   let i = 0;
   for (const ch of t) if (ch === q[i]) i++;
   return i === q.length ? 15 : 0;

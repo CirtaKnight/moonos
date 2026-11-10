@@ -38,7 +38,7 @@ export function Terminal({ windowId, screenId }: AppProps) {
     {
       id: entrySeq++,
       lines: [
-        { text: "CirtaKnight OS 1.0 — cksh", tone: "accent" },
+        { text: "MoonOS 1.0 — moonsh", tone: "accent" },
         { text: "Type `help` to see what I can do. Try `whoami` or `ls`.", tone: "muted" },
       ],
     },
@@ -57,7 +57,7 @@ export function Terminal({ windowId, screenId }: AppProps) {
     inputRef.current?.focus({ preventScroll: true });
   }, []);
 
-  const prompt = `${user}@ck-os:${promptPath(cwd)}$`;
+  const prompt = `${user}@moonos:${promptPath(cwd)}$`;
 
   function submit() {
     const raw = input;

@@ -18,7 +18,7 @@ describe("scoreText", () => {
 describe("search", () => {
   it("finds apps, projects, tags and files", () => {
     expect(search("term", fallbackContent, apps)[0]).toMatchObject({ kind: "app", id: "terminal" });
-    expect(search("cirta", fallbackContent, apps)[0]).toMatchObject({ kind: "project", slug: "cirtaknight-os" });
+    expect(search("moon", fallbackContent, apps)[0]).toMatchObject({ kind: "project", slug: "moonos" });
     expect(search("zustand", fallbackContent, apps)[0]).toMatchObject({ kind: "project" });
     expect(search("readme", fallbackContent, apps)[0]).toMatchObject({ kind: "file", title: "README.txt" });
   });

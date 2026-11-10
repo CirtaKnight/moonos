@@ -268,11 +268,11 @@ export function runCommand(
     case "fastfetch": {
       const art = ["   .--.  ", "  /  .-' ", " |  (    ", "  \\  '-. ", "   '--'  "];
       const info = [
-        `${profile.handle}@cirtaknight-os`,
+        `${profile.handle}@moonos`,
         "-----------------------",
-        "OS: CirtaKnight OS 1.0 (crescent)",
+        "OS: MoonOS 1.0 (crescent)",
         "Kernel: ck-6.13-lunar",
-        `Shell: cksh · Projects: ${projects.filter((p) => !p.archived).length}`,
+        `Shell: moonsh · Projects: ${projects.filter((p) => !p.archived).length}`,
         "UI: Next.js · React · Tailwind",
         `Moon: ${moonPhaseName(moonPhase(ctx.now))}`,
       ];

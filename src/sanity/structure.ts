@@ -3,7 +3,7 @@ import type { StructureResolver } from "sanity/structure";
 /** Admin sidebar: singletons first as fixed entries, then the collections. */
 export const structure: StructureResolver = (S) =>
   S.list()
-    .title("CirtaKnight OS")
+    .title("MoonOS")
     .items([
       S.listItem()
         .title("Profile (About me)")

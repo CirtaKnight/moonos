@@ -1,6 +1,6 @@
 /**
  * Seeds the Sanity dataset with the built-in starter content (profile, settings,
- * the "CirtaKnight OS" project and the GitHub social) so it's all editable in /admin.
+ * the "MoonOS" project and the GitHub social) so it's all editable in /admin.
  * Idempotent: existing documents are left untouched.
  *
  *   node --env-file=.env.local scripts/seed.ts
@@ -48,9 +48,12 @@ tx.createIfNotExists({
   bootLines: settings.bootLines,
 });
 
+// The starter project was seeded before the MoonOS rename; keep its original id.
+const LEGACY_IDS: Record<string, string> = { moonos: "project-cirtaknight-os" };
+
 for (const p of projects) {
   tx.createIfNotExists({
-    _id: `project-${p.slug}`,
+    _id: LEGACY_IDS[p.slug] ?? `project-${p.slug}`,
     _type: "project",
     title: p.title,
     slug: { _type: "slug", current: p.slug },

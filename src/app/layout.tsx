@@ -15,17 +15,17 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "CirtaKnight OS — Portfolio",
-    template: "%s · CirtaKnight OS",
+    default: "MoonOS — Portfolio",
+    template: "%s · MoonOS",
   },
   description:
     "The portfolio of CirtaKnight, a computer science engineering student — explore projects inside a web operating system.",
-  applicationName: "CirtaKnight OS",
+  applicationName: "MoonOS",
   openGraph: {
     type: "website",
-    title: "CirtaKnight OS — Portfolio",
+    title: "MoonOS — Portfolio",
     description: "Boot up and explore the projects of CirtaKnight, CS engineering student.",
-    siteName: "CirtaKnight OS",
+    siteName: "MoonOS",
   },
   twitter: { card: "summary_large_image" },
 };

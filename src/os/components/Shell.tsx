@@ -80,7 +80,7 @@ export function MenuBar() {
       style={{ height: MENUBAR_H }}
     >
       <StartButton size={20} />
-      <span className="text-[13px] font-semibold tracking-tight">{focusedTitle ?? "CirtaKnight OS"}</span>
+      <span className="text-[13px] font-semibold tracking-tight">{focusedTitle ?? "MoonOS"}</span>
       <div className="ml-auto flex items-center gap-1">
         <TrayActions />
         <span className="mx-1 h-4 w-px bg-line" />

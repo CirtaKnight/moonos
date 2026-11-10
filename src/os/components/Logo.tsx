@@ -72,7 +72,7 @@ export function LogoMark({
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={`font-display tracking-[0.32em] uppercase ${className ?? ""}`}>
-      Cirta<span className="text-accent">Knight</span>
+      Moon<span className="text-accent">OS</span>
     </span>
   );
 }

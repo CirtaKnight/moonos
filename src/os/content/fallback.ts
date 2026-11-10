@@ -5,7 +5,7 @@ import type { OSContent } from "./types";
  * Editable from the admin (Site settings → Boot lines); these are the defaults.
  */
 export const DEFAULT_BOOT_LINES: string[] = [
-  "dim|CirtaKnight OS 1.0.0-crescent (tty1)",
+  "dim|MoonOS 1.0.0-crescent (tty1)",
   "info|Booting kernel ck-6.13-lunar ...",
   "dim|Command line: BOOT_IMAGE=/vmlinuz root=/dev/portfolio ro quiet splash curiosity=max",
   "ok|Initialized memory: 16 GB of ideas, 0 B of free time",
@@ -46,9 +46,9 @@ export const fallbackContent: OSContent = {
   },
   projects: [
     {
-      id: "fallback-cirtaknight-os",
-      slug: "cirtaknight-os",
-      title: "CirtaKnight OS",
+      id: "fallback-moonos",
+      slug: "moonos",
+      title: "MoonOS",
       summary: "This portfolio — a web operating system built with Next.js and Sanity.",
       description:
         "A browser-based desktop with a boot sequence, a window manager, a terminal and a phone mode for mobile. All content is managed from an admin panel, so new projects appear without touching code.",
@@ -61,13 +61,13 @@ export const fallbackContent: OSContent = {
           id: "readme",
           kind: "note",
           title: "README.txt",
-          text: "CirtaKnight OS\n==============\n\nYou're running it right now.\n\n- Boot sequence with a typed kernel log\n- Draggable, resizable, snappable windows\n- Terminal with real commands (try `help`)\n- Phone-style home screen on mobile\n- Every project managed from a headless CMS\n\nStack: Next.js · TypeScript · Tailwind CSS · Zustand · Motion · Sanity",
+          text: "MoonOS\n==============\n\nYou're running it right now.\n\n- Boot sequence with a typed kernel log\n- Draggable, resizable, snappable windows\n- Terminal with real commands (try `help`)\n- Phone-style home screen on mobile\n- Every project managed from a headless CMS\n\nStack: Next.js · TypeScript · Tailwind CSS · Zustand · Motion · Sanity",
         },
         {
           id: "source",
           kind: "link",
           title: "Source code on GitHub",
-          url: "https://github.com/CirtaKnight/cirtaknight-os",
+          url: "https://github.com/CirtaKnight/moonos",
         },
       ],
     },
@@ -86,7 +86,7 @@ export const fallbackContent: OSContent = {
   settings: {
     bootLines: DEFAULT_BOOT_LINES,
     welcomeNote:
-      "Welcome to CirtaKnight OS.\n\nEach folder on the desktop is a project — double-click to open it.\nOpen the start menu and click my profile to learn about me.\nCurious? Open the Terminal and type `help`.\n\nNew projects land here regularly. Thanks for visiting.",
+      "Welcome to MoonOS.\n\nEach folder on the desktop is a project — double-click to open it.\nOpen the start menu and click my profile to learn about me.\nCurious? Open the Terminal and type `help`.\n\nNew projects land here regularly. Thanks for visiting.",
     wallpapers: [
       { id: "eclipse", name: "Eclipse" },
       { id: "tide", name: "Night Tide" },

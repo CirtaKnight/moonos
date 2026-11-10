@@ -228,7 +228,7 @@ function AboutOS() {
       <div className="flex items-center gap-4">
         <LogoMark size={64} />
         <div>
-          <h2 className="font-display text-lg tracking-[0.2em] text-fg uppercase">CirtaKnight OS</h2>
+          <h2 className="font-display text-lg tracking-[0.2em] text-fg uppercase">MoonOS</h2>
           <p className="text-sm text-muted">Version 1.0 “Crescent”</p>
         </div>
       </div>

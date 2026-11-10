@@ -28,7 +28,7 @@ export function useStartupNotifications() {
         () =>
           push({
             id: "welcome",
-            title: settings.seenProjects.length ? "Welcome back" : "Welcome to CirtaKnight OS",
+            title: settings.seenProjects.length ? "Welcome back" : "Welcome to MoonOS",
             body: "Open the Terminal and type `help`, or press Ctrl+K to search.",
             action: { type: "app", app: "terminal" },
           }),
