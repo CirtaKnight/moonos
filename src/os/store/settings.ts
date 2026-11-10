@@ -14,6 +14,8 @@ export interface SettingsState {
   reduceMotion: boolean;
   /** Set after the first full boot; return visits get the short boot. */
   hasBooted: boolean;
+  /** Project ids the visitor has already been notified about. */
+  seenProjects: string[];
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   setLayout: (layout: ShellLayout) => void;
@@ -21,6 +23,7 @@ export interface SettingsState {
   setSound: (on: boolean) => void;
   setReduceMotion: (on: boolean) => void;
   markBooted: () => void;
+  markProjectsSeen: (ids: string[]) => void;
 }
 
 function applyToDocument(theme: Theme, reduceMotion: boolean) {
@@ -39,6 +42,7 @@ export const useSettings = create<SettingsState>()(
       sound: false,
       reduceMotion: false,
       hasBooted: false,
+      seenProjects: [],
       setTheme: (theme) => {
         applyToDocument(theme, get().reduceMotion);
         set({ theme });
@@ -52,17 +56,19 @@ export const useSettings = create<SettingsState>()(
         set({ reduceMotion });
       },
       markBooted: () => set({ hasBooted: true }),
+      markProjectsSeen: (ids) => set({ seenProjects: [...new Set([...get().seenProjects, ...ids])] }),
     }),
     {
       // Keep in sync with the theme init script in app/layout.tsx.
       name: "ck-os-settings",
-      partialize: ({ theme, layout, wallpaper, sound, reduceMotion, hasBooted }) => ({
+      partialize: ({ theme, layout, wallpaper, sound, reduceMotion, hasBooted, seenProjects }) => ({
         theme,
         layout,
         wallpaper,
         sound,
         reduceMotion,
         hasBooted,
+        seenProjects,
       }),
     },
   ),

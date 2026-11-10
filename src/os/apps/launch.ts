@@ -1,12 +1,14 @@
 "use client";
 
 import type { Project, ProjectItem } from "../content/types";
+import { play } from "../lib/sound";
 import { useWindows, type WindowParams } from "../store/windows";
 import { getApp, type AppId } from "./registry";
 
 /** Open (or focus) an app window. */
 export function openApp(appId: AppId, params: WindowParams = {}, title?: string, key?: string) {
   const app = getApp(appId);
+  play("open");
   return useWindows.getState().open(appId, {
     title: title ?? app.name,
     params,
