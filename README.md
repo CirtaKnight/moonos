@@ -17,6 +17,16 @@ Everything you see is editable from an admin panel at **`/admin`** — no code c
 - **Shareable links** — `/?open=project/<slug>` opens a project directly; the address bar follows the focused window.
 - **No page scroll, ever** — content scrolls inside windows only.
 - **Live moon phase** — computed locally, shown in the menu bar, widgets and terminal.
+- **Living sky** — an interactive starfield wallpaper: parallax with the cursor (or phone tilt), twinkling, shooting stars and constellations that form around the pointer.
+- **Crescent cursor** — a moon-shaped pointer with a stardust trail (mouse/trackpad; toggle in Settings).
+- **Right-click everywhere** — desktop, icons, windows and dock have context menus (long-press on phones): wallpaper, theme, sort icons, get info, copy link, snap, always on top…
+- **Arrange your desktop** — drag icons on a snapping grid (remembered per visitor), box-select, Enter to open.
+- **Notifications that link out** — live public GitHub activity (commits, new repos, releases, PRs) and announcements you post from the admin (LinkedIn posts, awards…).
+- **Agenda** — past and upcoming projects, events and hackathons as a calendar and a timeline.
+- **Games** — Lunar Drift, Moonword (daily word), Keystroke (code typing), Phase memory and Orbit, all original, with best scores.
+- **Trophies** — 21 achievements, including hidden secrets (try the Konami code…).
+- **Lock screen & screensaver**, **Alt + \` window switcher**, and a `?` shortcuts sheet.
+- **Crawlable pages** — `/projects` and `/projects/<slug>` for search engines and screen readers.
 
 ## Stack
 
@@ -41,6 +51,7 @@ Without Sanity env vars the site still runs on built-in starter content.
 | `npm run dev` | Dev server |
 | `npm run build` / `npm start` | Production build / server |
 | `npm test` | Unit tests (Vitest) |
+| `npm run e2e` | End-to-end tests (Playwright, desktop + mobile) |
 | `npm run typecheck` / `npm run lint` | Type and lint checks |
 | `npm run seed` | Load starter content into Sanity (idempotent) |
 
@@ -51,7 +62,11 @@ Sign in with your Sanity account, then:
 - **Profile (About me)** — name, headline, photo, bio, skills, education, CV PDF.
 - **Projects** — each project is a desktop folder: title, summary, description, tags, cover, folder color, order, and its **files** (PDF, image, video, YouTube/Vimeo, link, note). Tick *Move to Recycle Bin* to archive.
 - **Gallery & Videos**, **Socials (Browser)**, **Music**.
+- **Agenda** — past and upcoming projects, events and hackathons.
+- **Announcements** — notifications with a link (e.g. "New post on LinkedIn").
 - **Site settings** — Welcome.txt, boot lines, extra wallpapers, weather city.
+
+Set your **GitHub username** in Profile to turn on the live activity notifications. Add a project's **GitHub repository** to show its stars and language in the folder.
 
 Published changes appear on the live site within seconds thanks to the revalidation webhook (see below).
 
