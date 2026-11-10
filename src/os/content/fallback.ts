@@ -88,6 +88,7 @@ export const fallbackContent: OSContent = {
     welcomeNote:
       "Welcome to MoonOS.\n\nEach folder on the desktop is a project — double-click to open it.\nOpen the start menu and click my profile to learn about me.\nCurious? Open the Terminal and type `help`.\n\nNew projects land here regularly. Thanks for visiting.",
     wallpapers: [
+      { id: "starfield", name: "Living sky" },
       { id: "eclipse", name: "Eclipse" },
       { id: "tide", name: "Night Tide" },
       { id: "dune", name: "Desert Dawn" },

@@ -2,6 +2,7 @@
 
 import { useContent } from "../content/ContentProvider";
 import { useSettings } from "../store/settings";
+import { Starfield } from "./Starfield";
 
 /**
  * Built-in wallpapers are drawn in CSS/SVG so they're crisp at any size and cost no bandwidth.
@@ -24,6 +25,7 @@ export function Wallpaper() {
   }
 
   const day = theme === "day";
+  if (id === "starfield") return <Starfield />;
   if (id === "tide") return <Tide day={day} />;
   if (id === "dune") return <Dune day={day} />;
   return <Eclipse day={day} />;
