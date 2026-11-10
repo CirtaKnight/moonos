@@ -16,6 +16,7 @@ import { useNow, useViewport } from "../hooks";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
 import { usePhone, type Screen } from "../store/phone";
 import { useUI } from "../store/ui";
+import { useDeepLinks } from "../useDeepLinks";
 
 const DOCK: AppId[] = ["projects", "terminal", "browser", "mail"];
 const GRID_APPS: AppId[] = ["cv", "gallery", "videos", "music", "game", "settings", "bin"];
@@ -35,6 +36,7 @@ export function Phone() {
   const stack = usePhone((s) => s.stack);
   const panel = useUI((s) => s.panel);
   useStartupNotifications();
+  useDeepLinks();
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-bg">

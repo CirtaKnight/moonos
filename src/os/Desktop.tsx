@@ -13,6 +13,7 @@ import { useViewport } from "./hooks";
 import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
 import { useWindows } from "./store/windows";
+import { useDeepLinks } from "./useDeepLinks";
 
 export function Desktop() {
   const layout = useSettings((s) => s.layout);
@@ -25,6 +26,7 @@ export function Desktop() {
   const selectIcon = useUI((s) => s.selectIcon);
   const snapPreview = useUI((s) => s.snapPreview);
   useStartupNotifications();
+  useDeepLinks();
 
   // Usable area for windows depends on the shell layout.
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
-import { Calendar, ExternalLink } from "lucide-react";
+import { Calendar, Check, ExternalLink, Link2 } from "lucide-react";
+import { useState } from "react";
 import { FolderIcon } from "../components/AppIcon";
 import { FileThumb, kindLabel } from "../components/FileIcons";
 import { useContent } from "../content/ContentProvider";
@@ -32,7 +33,10 @@ export function Folder({ params }: AppProps) {
             <FolderIcon color={project.color} size={64} />
           </span>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold tracking-tight text-fg">{project.title}</h1>
+            <div className="flex items-start gap-3">
+              <h1 className="mr-auto text-xl font-semibold tracking-tight text-fg">{project.title}</h1>
+              <CopyLink slug={project.slug} />
+            </div>
             {project.summary && <p className="mt-1 text-sm text-muted">{project.summary}</p>}
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               {project.date && (
@@ -81,5 +85,28 @@ export function Folder({ params }: AppProps) {
         </ul>
       )}
     </Scroll>
+  );
+}
+
+function CopyLink({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        const url = `${window.location.origin}/?open=project/${slug}`;
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        } catch {
+          window.prompt("Copy this link:", url);
+        }
+      }}
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-xs text-muted transition-colors hover:text-fg"
+    >
+      {copied ? <Check size={13} className="text-success" /> : <Link2 size={13} />}
+      {copied ? "Copied" : "Copy link"}
+    </button>
   );
 }
