@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useContent } from "../content/ContentProvider";
 import { complete, promptPath, runCommand, type Line, type Tone } from "../lib/terminal";
+import { usePhone } from "../store/phone";
 import { usePower } from "../store/power";
 import { useSettings } from "../store/settings";
 import { useWindows } from "../store/windows";
@@ -29,7 +30,7 @@ const toneClass: Record<Tone, string> = {
 let entrySeq = 0;
 
 /** Always dark, whatever the theme: terminals are night creatures. */
-export function Terminal({ windowId }: AppProps) {
+export function Terminal({ windowId, screenId }: AppProps) {
   const content = useContent();
   const user = content.profile.handle;
   const [cwd, setCwd] = useState<string[]>([]);
@@ -74,6 +75,7 @@ export function Terminal({ windowId }: AppProps) {
           break;
         case "exit":
           if (windowId) useWindows.getState().close(windowId);
+          else if (screenId) usePhone.getState().pop();
           return;
         case "restart":
           setTimeout(() => usePower.getState().restart(), 400);

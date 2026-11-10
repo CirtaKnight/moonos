@@ -4,8 +4,10 @@ import type { WindowParams } from "../store/windows";
 
 export interface AppProps {
   params: WindowParams;
-  /** Present when rendered inside a desktop window; absent in the phone shell. */
+  /** Present when rendered inside a desktop window. */
   windowId?: string;
+  /** Present when rendered as a full-screen app in the phone shell. */
+  screenId?: string;
 }
 
 export interface AppDefinition {

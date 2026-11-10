@@ -6,11 +6,12 @@ import { useContent } from "../content/ContentProvider";
 import type { ProjectItem } from "../content/types";
 import { toEmbedUrl } from "../lib/embed";
 import { useWindows } from "../store/windows";
+import { updateHost } from "./launch";
 import type { AppProps } from "./types";
 import { Button, EmptyState } from "./ui";
 
 /** Shows one file of a project: image (with prev/next), PDF, video or embedded video. */
-export function Viewer({ params, windowId }: AppProps) {
+export function Viewer({ params, windowId, screenId }: AppProps) {
   const { projects, media } = useContent();
   const project = projects.find((p) => p.slug === params.slug);
   const items: ProjectItem[] = project
@@ -22,7 +23,7 @@ export function Viewer({ params, windowId }: AppProps) {
 
   if (!item) return <EmptyState title="File not found">It may have been removed from the folder.</EmptyState>;
 
-  if (item.kind === "image") return <ImageView items={items} item={item} params={params} windowId={windowId} />;
+  if (item.kind === "image") return <ImageView items={items} item={item} params={params} windowId={windowId} screenId={screenId} />;
   if (item.kind === "pdf") return <PdfView item={item} />;
   if (item.kind === "video") return <VideoView item={item} />;
   if (item.kind === "embed") return <EmbedView item={item} />;
@@ -34,29 +35,27 @@ function ImageView({
   item,
   params,
   windowId,
+  screenId,
 }: {
   items: ProjectItem[];
   item: ProjectItem;
   params: AppProps["params"];
   windowId?: string;
+  screenId?: string;
 }) {
   const images = items.filter((i) => i.kind === "image" && i.url);
   const index = images.findIndex((i) => i.id === item.id);
   const go = (delta: number) => {
     const next = images[(index + delta + images.length) % images.length];
-    if (!next || !windowId) return;
+    if (!next) return;
     const key = params.media ? "media" : "item";
-    useWindows.setState((s) => ({
-      windows: s.windows.map((w) =>
-        w.id === windowId ? { ...w, title: next.title, params: { ...w.params, [key]: next.id } } : w,
-      ),
-    }));
+    updateHost(windowId, screenId, { title: next.title, params: { [key]: next.id } });
   };
 
   useEffect(() => {
-    if (!windowId || images.length < 2) return;
+    if (images.length < 2) return;
     const onKey = (e: KeyboardEvent) => {
-      if (useWindows.getState().focusedId !== windowId) return;
+      if (windowId && useWindows.getState().focusedId !== windowId) return;
       if (e.key === "ArrowRight") go(1);
       if (e.key === "ArrowLeft") go(-1);
     };
