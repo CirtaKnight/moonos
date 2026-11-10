@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useContent } from "../content/ContentProvider";
 import { complete, promptPath, runCommand, type Line, type Tone } from "../lib/terminal";
+import { useAchievements } from "../store/achievements";
 import { usePhone } from "../store/phone";
 import { usePower } from "../store/power";
 import { useSettings } from "../store/settings";
@@ -66,6 +67,7 @@ export function Terminal({ windowId, screenId }: AppProps) {
     const nextHistory = raw.trim() ? [...history, raw] : history;
     setHistory(nextHistory);
     const res = runCommand(raw, { content, cwd, history: nextHistory });
+    if (raw.trim()) useAchievements.getState().trackCommand();
 
     let cleared = false;
     for (const fx of res.effects) {
@@ -94,6 +96,9 @@ export function Terminal({ windowId, screenId }: AppProps) {
           break;
         case "openItem":
           openItem(fx.slug, fx.item);
+          break;
+        case "achievement":
+          useAchievements.getState().unlock(fx.id);
           break;
       }
     }

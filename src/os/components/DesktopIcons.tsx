@@ -147,7 +147,7 @@ export function DesktopIcons() {
       ref={areaRef}
       aria-label="Desktop"
       role="list"
-      className="absolute"
+      className="absolute isolate"
       style={{ left: bounds.x, top: bounds.y, width: bounds.w, height: bounds.h }}
       onPointerDown={onAreaPointerDown}
       onContextMenu={areaMenu.onContextMenu}

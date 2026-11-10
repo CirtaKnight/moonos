@@ -2,6 +2,7 @@
 
 import type { Project, ProjectItem } from "../content/types";
 import { play } from "../lib/sound";
+import { useAchievements } from "../store/achievements";
 import { usePhone } from "../store/phone";
 import { useWindows, type WindowParams } from "../store/windows";
 import { getApp, type AppId } from "./registry";
@@ -14,6 +15,7 @@ export function openApp(appId: AppId, params: WindowParams = {}, title?: string,
   const resolvedTitle = title ?? app.name;
   const resolvedKey = key ?? appId;
   play("open");
+  useAchievements.getState().trackApp(appId);
   if (usePhone.getState().active) {
     usePhone.getState().push({ appId, title: resolvedTitle, params, key: resolvedKey });
     return resolvedKey;

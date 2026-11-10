@@ -14,7 +14,8 @@ export type Effect =
   | { type: "theme"; value: "night" | "day" | "toggle" }
   | { type: "openApp"; app: string }
   | { type: "openProject"; slug: string; title: string }
-  | { type: "openItem"; slug: string; item: ProjectItem };
+  | { type: "openItem"; slug: string; item: ProjectItem }
+  | { type: "achievement"; id: string };
 
 export interface Result {
   lines: Line[];
@@ -106,7 +107,7 @@ export const promptPath = (cwd: string[]) => (cwd.length ? `~/${cwd.join("/")}` 
 
 /* ---------------------------------- Commands ---------------------------------- */
 
-const APPS = ["about", "projects", "browser", "gallery", "videos", "terminal", "mail", "music", "game", "settings", "bin", "cv"];
+const APPS = ["about", "projects", "browser", "gallery", "videos", "terminal", "mail", "music", "game", "settings", "bin", "cv", "games", "agenda", "trophies"];
 const APP_ALIASES: Record<string, string> = {
   resume: "cv",
   "résumé": "cv",
@@ -136,6 +137,7 @@ export const COMMANDS: Record<string, string> = {
   echo: "print text",
   history: "command history",
   clear: "clear the screen",
+  trophies: "your achievements",
   reboot: "restart the OS",
   exit: "close the terminal",
 };
@@ -320,8 +322,10 @@ export function runCommand(
         say(`[sudo] password for recruiter: ********`, "muted");
         say(`Access granted. Excellent decision. 🌙`, "success");
         effects.push({ type: "openApp", app: "mail" });
+        effects.push({ type: "achievement", id: "hire-me" });
       } else if (rest.startsWith("rm")) {
         say("Nice try. This incident will be reported to the moon.", "error");
+        effects.push({ type: "achievement", id: "nice-try" });
       } else {
         say(`${profile.handle} is not in the sudoers file. This incident will be reported.`, "error");
         say("Hint: some sudo commands are more welcome than others. Try `sudo hire-me`.", "muted");
@@ -330,6 +334,19 @@ export function runCommand(
     }
     case "rm":
       say(args.includes("-rf") ? "rm: refusing to delete the night sky." : "rm: permission denied (portfolio is read-only)", "error");
+      if (args.includes("-rf")) effects.push({ type: "achievement", id: "nice-try" });
+      break;
+    case "moonwalk":
+      say("   o      o      o      o", "accent");
+      say("  /|\    /|\    /|\    /|\\", "accent");
+      say("  / \  <  \   / \  <  \   ← gliding backwards…", "accent");
+      say("Smooth. Very smooth.", "muted");
+      effects.push({ type: "achievement", id: "moonwalk" });
+      break;
+    case "trophies":
+    case "achievements":
+      effects.push({ type: "openApp", app: "trophies" });
+      say("Opening Trophies…", "muted");
       break;
     case "coffee":
       say("      ( (", "gold");

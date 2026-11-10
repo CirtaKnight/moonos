@@ -26,6 +26,7 @@ import { Folder as FolderApp } from "./Folder";
 import { Info } from "./Info";
 import { Gallery, Videos } from "./Media";
 import { Soon } from "./Soon";
+import { Trophies } from "./Trophies";
 import { Game } from "./Game";
 import { Mail as MailApp } from "./Mail";
 import { Music } from "./Music";
@@ -79,7 +80,7 @@ export const apps: Record<AppId, AppDefinition> = {
   info: { id: "info", name: "Get info", icon: InfoIcon, tint: "#bccbeb", component: Info, size: { w: 420, h: 440 }, listed: false, pinned: false },
   games: { id: "games", name: "Games", icon: Joystick, tint: "#a6e3e8", component: Soon, size: { w: 640, h: 480 }, listed: true, pinned: false, description: "Small original games" },
   agenda: { id: "agenda", name: "Agenda", icon: CalendarDays, tint: "#f0c987", component: Soon, size: { w: 860, h: 580 }, listed: true, pinned: true, description: "Projects, events & hackathons" },
-  trophies: { id: "trophies", name: "Trophies", icon: Trophy, tint: "#c8a96f", component: Soon, size: { w: 720, h: 560 }, listed: true, pinned: false, description: "Achievements & secrets" },
+  trophies: { id: "trophies", name: "Trophies", icon: Trophy, tint: "#c8a96f", component: Trophies, size: { w: 720, h: 560 }, listed: true, pinned: false, description: "Achievements & secrets" },
 };
 
 export function getApp(id: string): AppDefinition {
