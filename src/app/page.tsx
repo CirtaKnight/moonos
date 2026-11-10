@@ -1,7 +1,7 @@
 import { OS } from "@/os/OS";
-import { getContent } from "@/os/content/getContent";
+import { getOSContent } from "@/os/content/getContent";
 
 export default async function Home() {
-  const content = await getContent();
+  const content = await getOSContent();
   return <OS content={content} />;
 }

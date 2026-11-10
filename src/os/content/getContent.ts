@@ -3,7 +3,10 @@ import { cacheLife, cacheTag } from "next/cache";
 import { client, SANITY_TAG } from "@/sanity/client";
 import { isSanityConfigured } from "@/sanity/env";
 import { OS_CONTENT_QUERY } from "@/sanity/queries";
+import { githubUser } from "../lib/links";
+import { parseRepo } from "../lib/github";
 import { fallbackContent } from "./fallback";
+import { getGithubActivity, getRepoStats } from "./github";
 import type { OSContent, Profile, Project, SiteSettings } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw CMS payload is normalised below */
@@ -31,6 +34,7 @@ function toProfile(raw: any): Profile {
     email: raw.email ?? undefined,
     cvUrl: raw.cvUrl ?? undefined,
     available: raw.available ?? undefined,
+    githubUsername: raw.githubUsername || undefined,
   };
 }
 
@@ -47,6 +51,7 @@ function toProject(raw: any): Project {
     color: raw.color ?? undefined,
     archived: Boolean(raw.archived),
     publishedAt: raw.publishedAt ?? undefined,
+    repo: raw.repoUrl ? { url: raw.repoUrl, fullName: raw.repoUrl.replace(/^https?:\/\/(www\.)?github\.com\//, "") } : undefined,
     items: compact<any>(raw.items)
       .filter((i) => i.kind && i.title)
       .map((i) => ({
@@ -98,6 +103,27 @@ export async function getContent(): Promise<OSContent> {
       socials: compact<any>(raw?.socials),
       tracks: compact<any>(raw?.tracks),
       settings: toSettings(raw?.settings),
+      activity: [],
+      announcements: compact<any>(raw?.announcements).map((a) => ({
+        id: a.id,
+        title: a.title,
+        body: a.body ?? undefined,
+        url: a.url ?? undefined,
+        linkLabel: a.linkLabel ?? undefined,
+        source: a.source ?? "generic",
+        publishedAt: a.publishedAt,
+      })),
+      events: compact<any>(raw?.events).map((e) => ({
+        id: e.id,
+        title: e.title ?? "Untitled",
+        kind: e.kind ?? "other",
+        start: e.start,
+        end: e.end ?? undefined,
+        location: e.location ?? undefined,
+        url: e.url ?? undefined,
+        description: e.description ?? undefined,
+        projectSlug: e.projectSlug ?? undefined,
+      })),
     };
   } catch (err) {
     console.error("[getContent] Sanity fetch failed, using built-in content:", err);
@@ -105,4 +131,27 @@ export async function getContent(): Promise<OSContent> {
     cacheLife("minutes");
     return fallbackContent;
   }
+}
+
+/**
+ * CMS content plus live GitHub data (activity feed and per-project repo stats).
+ * GitHub calls are cached separately, so a GitHub outage never blocks the page.
+ */
+export async function getOSContent(): Promise<OSContent> {
+  const content = await getContent();
+  const user = githubUser(content);
+  const [activity, repos] = await Promise.all([
+    getGithubActivity(user),
+    Promise.all(
+      content.projects.map(async (p) => {
+        const full = parseRepo(p.repo?.url);
+        return full ? ((await getRepoStats(full)) ?? p.repo) : p.repo;
+      }),
+    ),
+  ]);
+  return {
+    ...content,
+    activity,
+    projects: content.projects.map((p, i) => ({ ...p, repo: repos[i] ?? undefined })),
+  };
 }

@@ -109,6 +109,42 @@ export interface SiteSettings {
   wallpapers: Wallpaper[];
 }
 
+export interface ActivityItem {
+  id: string;
+  kind: "push" | "create" | "release" | "pr" | "star" | "fork";
+  title: string;
+  body?: string;
+  url: string;
+  at: string;
+  repo: string;
+}
+
+export type AnnouncementSource = "linkedin" | "github" | "trophy" | "calendar" | "star" | "generic";
+
+export interface Announcement {
+  id: string;
+  title: string;
+  body?: string;
+  url?: string;
+  linkLabel?: string;
+  source: AnnouncementSource;
+  publishedAt: string;
+}
+
+export type EventKind = "project" | "event" | "hackathon" | "competition" | "talk" | "exam" | "other";
+
+export interface AgendaEvent {
+  id: string;
+  title: string;
+  kind: EventKind;
+  start: string;
+  end?: string;
+  location?: string;
+  url?: string;
+  description?: string;
+  projectSlug?: string;
+}
+
 export interface OSContent {
   profile: Profile;
   projects: Project[];
@@ -116,6 +152,10 @@ export interface OSContent {
   socials: Social[];
   tracks: Track[];
   settings: SiteSettings;
+  /** Live public GitHub activity (may be empty). */
+  activity: ActivityItem[];
+  announcements: Announcement[];
+  events: AgendaEvent[];
   /** "cms" when served from Sanity, "fallback" when using built-in defaults. */
   source: "cms" | "fallback";
 }
