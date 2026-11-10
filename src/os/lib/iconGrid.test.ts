@@ -1,0 +1,46 @@
+import { describe, expect, it } from "vitest";
+import { cellAt, clampMenu, intersects, moveIcon, placeIcons, rectFrom } from "./iconGrid";
+
+describe("placeIcons", () => {
+  it("fills column-major in default order", () => {
+    expect(placeIcons(["a", "b", "c"], {}, 2)).toEqual({ a: { c: 0, r: 0 }, b: { c: 0, r: 1 }, c: { c: 1, r: 0 } });
+  });
+
+  it("respects saved cells and fills around them", () => {
+    const l = placeIcons(["a", "b", "c"], { b: { c: 0, r: 0 } }, 2);
+    expect(l.b).toEqual({ c: 0, r: 0 });
+    expect(l.a).toEqual({ c: 0, r: 1 });
+    expect(l.c).toEqual({ c: 1, r: 0 });
+  });
+
+  it("drops saved cells that no longer fit or collide", () => {
+    const l = placeIcons(["a", "b"], { a: { c: 0, r: 9 }, b: { c: 3, r: 0 } }, 4);
+    expect(l.a).toEqual({ c: 0, r: 0 });
+    expect(l.b).toEqual({ c: 3, r: 0 });
+  });
+});
+
+describe("moveIcon", () => {
+  it("moves into an empty cell", () => {
+    expect(moveIcon({ a: { c: 0, r: 0 } }, "a", { c: 2, r: 1 })).toEqual({ a: { c: 2, r: 1 } });
+  });
+  it("swaps with an occupant", () => {
+    const l = moveIcon({ a: { c: 0, r: 0 }, b: { c: 0, r: 1 } }, "a", { c: 0, r: 1 });
+    expect(l).toEqual({ a: { c: 0, r: 1 }, b: { c: 0, r: 0 } });
+  });
+});
+
+describe("geometry helpers", () => {
+  it("finds and clamps cells", () => {
+    expect(cellAt(150, 250, 92, 100, 5, 4)).toEqual({ c: 1, r: 2 });
+    expect(cellAt(-10, 9999, 92, 100, 5, 4)).toEqual({ c: 0, r: 4 });
+  });
+  it("detects rectangle overlap", () => {
+    expect(intersects(rectFrom(10, 10, 0, 0), { x: 5, y: 5, w: 10, h: 10 })).toBe(true);
+    expect(intersects({ x: 0, y: 0, w: 4, h: 4 }, { x: 5, y: 5, w: 1, h: 1 })).toBe(false);
+  });
+  it("keeps menus inside the viewport", () => {
+    expect(clampMenu(10, 10, 200, 100, 1000, 800)).toEqual({ x: 10, y: 10 });
+    expect(clampMenu(950, 780, 200, 100, 1000, 800)).toEqual({ x: 794, y: 694 });
+  });
+});
