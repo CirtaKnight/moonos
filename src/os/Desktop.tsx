@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
+import { SkyWidget } from "./components/SkyWidget";
 import { Spotlight } from "./components/Spotlight";
 import { DOCK_RESERVED, Dock, MENUBAR_H, MenuBar, TASKBAR_H, Taskbar } from "./components/Shell";
 import { StartMenu } from "./components/StartMenu";
@@ -65,6 +66,7 @@ export function Desktop() {
     >
       <Wallpaper />
       <DesktopIcons />
+      <SkyWidget />
 
       <AnimatePresence>
         {snapPreview && (
