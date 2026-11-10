@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import { ContextMenuLayer } from "./components/ContextMenu";
 import { Cursor } from "./components/Cursor";
+import { KeyboardLayer } from "./components/Keyboard";
+import { useIdleScreensaver } from "./components/LockScreen";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
 import { SkyWidget } from "./components/SkyWidget";
@@ -18,6 +20,7 @@ import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
 import { useWindows } from "./store/windows";
 import { useDeepLinks } from "./useDeepLinks";
+import { useSkyAchievements } from "./useSkyAchievements";
 
 export function Desktop() {
   const layout = useSettings((s) => s.layout);
@@ -32,6 +35,8 @@ export function Desktop() {
   const snapPreview = useUI((s) => s.snapPreview);
   useStartupNotifications();
   useDeepLinks();
+  useIdleScreensaver();
+  useSkyAchievements();
 
   // Usable area for windows depends on the shell layout.
   useEffect(() => {
@@ -117,6 +122,7 @@ export function Desktop() {
       <AnimatePresence>{panel === "start" && <StartMenu key="start" />}</AnimatePresence>
       <NotificationLayer />
       <AnimatePresence>{panel === "search" && <Spotlight key="search" />}</AnimatePresence>
+      <KeyboardLayer />
       <ContextMenuLayer />
       {customCursor && finePointer && <Cursor />}
     </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ChevronRight, Power, RotateCcw, Search, Settings2 } from "lucide-react";
+import { ChevronRight, Keyboard, Lock, Power, RotateCcw, Search, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp, openProject } from "../apps/launch";
@@ -19,7 +19,7 @@ export function StartMenu() {
   const layout = useSettings((s) => s.layout);
   const closePanel = useUI((s) => s.closePanel);
   const togglePanel = useUI((s) => s.togglePanel);
-  const { restart, shutdown } = usePower.getState();
+  const { restart, shutdown, lock } = usePower.getState();
   const [powerOpen, setPowerOpen] = useState(false);
 
   const listed = (Object.keys(apps) as AppId[]).filter((id) => apps[id].listed && id !== "about");
@@ -128,9 +128,24 @@ export function StartMenu() {
         >
           <Settings2 size={16} /> Settings
         </button>
+        <button
+          type="button"
+          onClick={() => togglePanel("shortcuts")}
+          className="mr-auto flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-fg"
+        >
+          <Keyboard size={16} /> Shortcuts
+        </button>
         <div className="relative">
           {powerOpen && (
             <div className="glass absolute right-0 bottom-11 w-44 overflow-hidden rounded-xl border border-line-strong p-1 shadow-window">
+              <button
+                type="button"
+                onClick={() => launch(() => lock("lock"))}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg hover:bg-surface-hover"
+              >
+                <Lock size={15} /> Lock
+                <kbd className="ml-auto font-mono text-[10px] text-faint">Alt L</kbd>
+              </button>
               <button
                 type="button"
                 onClick={() => launch(restart)}

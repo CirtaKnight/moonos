@@ -20,6 +20,7 @@ import { contextMenuProps, useContextMenu, type MenuEntry } from "../store/conte
 import { usePhone, type Screen } from "../store/phone";
 import { useUI } from "../store/ui";
 import { useDeepLinks } from "../useDeepLinks";
+import { useSkyAchievements } from "../useSkyAchievements";
 
 const DOCK: AppId[] = ["projects", "terminal", "browser", "mail"];
 const GRID_APPS: AppId[] = ["games", "agenda", "cv", "gallery", "videos", "music", "trophies", "settings", "bin"];
@@ -50,6 +51,7 @@ export function Phone() {
   const panel = useUI((s) => s.panel);
   useStartupNotifications();
   useDeepLinks();
+  useSkyAchievements();
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-bg">

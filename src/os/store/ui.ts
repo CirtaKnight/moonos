@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import type { Rect } from "./windows";
 
-export type Panel = "start" | "search" | "notifications" | null;
+export type Panel = "start" | "search" | "notifications" | "shortcuts" | null;
 
 interface UIState {
   panel: Panel;
