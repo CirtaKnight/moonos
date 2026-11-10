@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
+import { Cursor } from "./components/Cursor";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
 import { SkyWidget } from "./components/SkyWidget";
@@ -10,7 +11,7 @@ import { DOCK_RESERVED, Dock, MENUBAR_H, MenuBar, TASKBAR_H, Taskbar } from "./c
 import { StartMenu } from "./components/StartMenu";
 import { Wallpaper } from "./components/Wallpaper";
 import { Window } from "./components/Window";
-import { useViewport } from "./hooks";
+import { useMediaQuery, useViewport } from "./hooks";
 import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
 import { useWindows } from "./store/windows";
@@ -18,6 +19,8 @@ import { useDeepLinks } from "./useDeepLinks";
 
 export function Desktop() {
   const layout = useSettings((s) => s.layout);
+  const customCursor = useSettings((s) => s.customCursor);
+  const finePointer = useMediaQuery("(pointer: fine)");
   const viewport = useViewport();
   const windows = useWindows((s) => s.windows);
   const setBounds = useWindows((s) => s.setBounds);
@@ -106,6 +109,7 @@ export function Desktop() {
       <AnimatePresence>{panel === "start" && <StartMenu key="start" />}</AnimatePresence>
       <NotificationLayer />
       <AnimatePresence>{panel === "search" && <Spotlight key="search" />}</AnimatePresence>
+      {customCursor && finePointer && <Cursor />}
     </motion.div>
   );
 }

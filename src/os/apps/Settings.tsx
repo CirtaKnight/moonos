@@ -16,13 +16,15 @@ import { Button, Scroll } from "./ui";
 const SECTIONS = [
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "desktop", label: "Desktop", icon: Monitor },
-  { id: "sound", label: "Sound & motion", icon: Volume2 },
+  { id: "sound", label: "Sound, cursor & motion", icon: Volume2 },
   { id: "about", label: "About this OS", icon: Info },
 ] as const;
 type Section = (typeof SECTIONS)[number]["id"];
 
 /** Built-in wallpaper swatches (drawn in CSS, so previews are tiny gradients). */
 const SWATCH: Record<string, string> = {
+  starfield:
+    "radial-gradient(circle at 82% 14%, rgb(188 203 235 / 0.35) 0 6%, transparent 7%), radial-gradient(1px 1px at 20% 30%, #fff 50%, transparent), radial-gradient(1px 1px at 45% 60%, #fff 50%, transparent), radial-gradient(1px 1px at 70% 40%, #fff 50%, transparent), radial-gradient(1px 1px at 30% 75%, #fff 50%, transparent), linear-gradient(180deg, #070a16, #030409)",
   eclipse: "radial-gradient(circle at 80% 15%, #2a3550 0, #0a0e1a 45%, #04060c 100%)",
   tide: "linear-gradient(180deg, #0a1022, #0c1530 60%, #1a2a50)",
   dune: "linear-gradient(180deg, #0b0d1a, #1b1a2e 45%, #3a2a2a 75%, #1a120f)",
@@ -193,6 +195,8 @@ function SoundMotion() {
   const setSound = useSettings((s) => s.setSound);
   const reduceMotion = useSettings((s) => s.reduceMotion);
   const setReduceMotion = useSettings((s) => s.setReduceMotion);
+  const customCursor = useSettings((s) => s.customCursor);
+  const setCustomCursor = useSettings((s) => s.setCustomCursor);
   return (
     <>
       <Group title="Sound">
@@ -204,6 +208,14 @@ function SoundMotion() {
             setSound(v);
             if (v) setTimeout(() => play("notify"), 50);
           }}
+        />
+      </Group>
+      <Group title="Cursor">
+        <Toggle
+          label="Crescent cursor"
+          hint="A moon-shaped pointer with a stardust trail (mouse and trackpad only)."
+          checked={customCursor}
+          onChange={setCustomCursor}
         />
       </Group>
       <Group title="Motion">

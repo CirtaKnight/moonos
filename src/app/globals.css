@@ -163,3 +163,14 @@ textarea {
 .caret {
   animation: caret-blink 1s steps(1) infinite;
 }
+
+/* Custom MoonOS cursor (desktop, fine pointers). Text fields keep the native I-beam. */
+:root[data-cursor="custom"],
+:root[data-cursor="custom"] * {
+  cursor: none !important;
+}
+:root[data-cursor="custom"] input:not([type="range"]):not([type="checkbox"]),
+:root[data-cursor="custom"] textarea,
+:root[data-cursor="custom"] [contenteditable="true"] {
+  cursor: text !important;
+}
