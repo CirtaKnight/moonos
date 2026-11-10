@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
+import { ContextMenuLayer } from "./components/ContextMenu";
 import { Cursor } from "./components/Cursor";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
@@ -12,6 +13,7 @@ import { StartMenu } from "./components/StartMenu";
 import { Wallpaper } from "./components/Wallpaper";
 import { Window } from "./components/Window";
 import { useMediaQuery, useViewport } from "./hooks";
+import { unlock } from "./store/achievements";
 import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
 import { useWindows } from "./store/windows";
@@ -27,7 +29,6 @@ export function Desktop() {
   const panel = useUI((s) => s.panel);
   const closePanel = useUI((s) => s.closePanel);
   const togglePanel = useUI((s) => s.togglePanel);
-  const selectIcon = useUI((s) => s.selectIcon);
   const snapPreview = useUI((s) => s.snapPreview);
   useStartupNotifications();
   useDeepLinks();
@@ -44,8 +45,18 @@ export function Desktop() {
 
   // Global shortcuts.
   useEffect(() => {
+    const konami = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+    let progress = 0;
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      progress = e.key === konami[progress] ? progress + 1 : e.key === konami[0] ? 1 : 0;
+      if (progress === konami.length) {
+        progress = 0;
+        unlock("konami");
+      }
+      if (e.key === "F5" && !e.ctrlKey) {
+        e.preventDefault();
+        useUI.getState().refresh();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         togglePanel("search");
       } else if (e.key === "Escape" && useUI.getState().panel) {
@@ -62,10 +73,7 @@ export function Desktop() {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="fixed inset-0 overflow-hidden"
-      onClick={() => {
-        closePanel();
-        selectIcon(null);
-      }}
+      onClick={closePanel}
     >
       <Wallpaper />
       <DesktopIcons />
@@ -109,6 +117,7 @@ export function Desktop() {
       <AnimatePresence>{panel === "start" && <StartMenu key="start" />}</AnimatePresence>
       <NotificationLayer />
       <AnimatePresence>{panel === "search" && <Spotlight key="search" />}</AnimatePresence>
+      <ContextMenuLayer />
       {customCursor && finePointer && <Cursor />}
     </motion.div>
   );

@@ -8,20 +8,25 @@ export type Panel = "start" | "search" | "notifications" | null;
 interface UIState {
   panel: Panel;
   snapPreview: Rect | null;
-  /** Desktop icon currently selected (single click). */
-  selectedIcon: string | null;
+  /** Desktop icons currently selected. */
+  selectedIcons: string[];
+  /** Bumped by "Refresh" to replay the desktop shimmer. */
+  refreshTick: number;
   togglePanel: (p: Exclude<Panel, null>) => void;
   closePanel: () => void;
   setSnapPreview: (r: Rect | null) => void;
-  selectIcon: (id: string | null) => void;
+  selectIcons: (ids: string[]) => void;
+  refresh: () => void;
 }
 
 export const useUI = create<UIState>()((set, get) => ({
   panel: null,
   snapPreview: null,
-  selectedIcon: null,
+  selectedIcons: [],
+  refreshTick: 0,
   togglePanel: (p) => set({ panel: get().panel === p ? null : p }),
   closePanel: () => set({ panel: null }),
   setSnapPreview: (snapPreview) => set({ snapPreview }),
-  selectIcon: (selectedIcon) => set({ selectedIcon }),
+  selectIcons: (selectedIcons) => set({ selectedIcons }),
+  refresh: () => set({ refreshTick: get().refreshTick + 1 }),
 }));

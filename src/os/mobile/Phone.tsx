@@ -1,25 +1,28 @@
 "use client";
 
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
-import { BatteryFull, ChevronLeft, Search, Wifi } from "lucide-react";
+import { BatteryFull, ChevronLeft, FolderOpen, Info, Link2, Search, Wifi } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp, openProject } from "../apps/launch";
 import { AppIcon, DocIcon, FolderIcon } from "../components/AppIcon";
 import { Avatar } from "../components/Avatar";
+import { ContextMenuLayer } from "../components/ContextMenu";
 import { MoonGlyph } from "../components/MoonGlyph";
 import { NotificationLayer, useStartupNotifications } from "../components/Notifications";
 import { Spotlight } from "../components/Spotlight";
 import { Wallpaper } from "../components/Wallpaper";
 import { useContent, useProjects } from "../content/ContentProvider";
 import { useNow, useViewport } from "../hooks";
+import { copyText, shareUrl } from "../lib/links";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
+import { contextMenuProps, useContextMenu, type MenuEntry } from "../store/contextMenu";
 import { usePhone, type Screen } from "../store/phone";
 import { useUI } from "../store/ui";
 import { useDeepLinks } from "../useDeepLinks";
 
 const DOCK: AppId[] = ["projects", "terminal", "browser", "mail"];
-const GRID_APPS: AppId[] = ["cv", "gallery", "videos", "music", "game", "settings", "bin"];
+const GRID_APPS: AppId[] = ["games", "agenda", "cv", "gallery", "videos", "music", "trophies", "settings", "bin"];
 const STATUS_H = 34;
 const DOCK_H = 96;
 const ROW_H = 96;
@@ -29,6 +32,16 @@ interface HomeEntry {
   label: string;
   icon: ReactNode;
   open: () => void;
+  info?: Record<string, string>;
+  link?: string;
+}
+
+function homeMenu(e: HomeEntry): MenuEntry[] {
+  return [
+    { label: "Open", icon: FolderOpen, onSelect: e.open },
+    ...(e.link ? [{ label: "Copy link", icon: Link2, onSelect: () => void copyText(shareUrl(e.link!)) } as MenuEntry] : []),
+    ...(e.info ? [{ label: "Get info", icon: Info, onSelect: () => openApp("info", e.info, `${e.label} — Info`, `info:${e.id}`) } as MenuEntry] : []),
+  ];
 }
 
 /** Phone-style shell for small / touch-first screens. Same content, same apps. */
@@ -50,6 +63,7 @@ export function Phone() {
       </AnimatePresence>
       <NotificationLayer />
       <AnimatePresence>{panel === "search" && <Spotlight key="search" />}</AnimatePresence>
+      <ContextMenuLayer />
     </div>
   );
 }
@@ -84,18 +98,22 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
   const entries: HomeEntry[] = useMemo(
     () => [
       { id: "welcome", label: "Welcome", icon: <DocIcon size={56} />, open: () => openApp("note", { welcome: 1 }, "Welcome.txt", "note:welcome") },
-      { id: "about", label: "About me", icon: <AppIcon icon={apps.about.icon} tint={apps.about.tint} size={56} />, open: () => openApp("about") },
+      { id: "about", label: "About me", icon: <AppIcon icon={apps.about.icon} tint={apps.about.tint} size={56} />, open: () => openApp("about"), info: { app: "about" }, link: "about" },
       ...projects.map((p) => ({
         id: `project:${p.slug}`,
         label: p.title,
         icon: <FolderIcon color={p.color} size={58} />,
         open: () => openProject(p),
+        info: { project: p.slug },
+        link: `project/${p.slug}`,
       })),
       ...GRID_APPS.map((id) => ({
         id,
         label: apps[id].name,
         icon: <AppIcon icon={apps[id].icon} tint={apps[id].tint} size={56} />,
         open: () => openApp(id),
+        info: { app: id },
+        link: id,
       })),
     ],
     [projects],
@@ -163,7 +181,7 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
             <ul key={p} className="grid w-full shrink-0 grid-cols-4 content-start gap-y-2 px-3 pt-3" style={{ gridAutoRows: ROW_H - 8 }}>
               {entries.slice(p * perPage, (p + 1) * perPage).map((e) => (
                 <li key={e.id}>
-                  <HomeIcon label={e.label} onOpen={e.open}>
+                  <HomeIcon label={e.label} onOpen={e.open} menu={() => homeMenu(e)}>
                     {e.icon}
                   </HomeIcon>
                 </li>
@@ -207,12 +225,20 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
   );
 }
 
-function HomeIcon({ label, onOpen, children }: { label: string; onOpen: () => void; children: ReactNode }) {
+function HomeIcon({ label, onOpen, menu, children }: { label: string; onOpen: () => void; menu: () => MenuEntry[]; children: ReactNode }) {
+  const longPress = contextMenuProps(menu);
   return (
     <motion.button
       type="button"
       whileTap={{ scale: 0.88 }}
-      onClick={onOpen}
+      onClick={() => {
+        if (!useContextMenu.getState().menu) onOpen();
+      }}
+      onContextMenu={longPress.onContextMenu}
+      onPointerDown={longPress.onPointerDown}
+      onPointerMove={longPress.onPointerMove}
+      onPointerUp={longPress.onPointerUp}
+      onPointerCancel={longPress.onPointerCancel}
       className="flex w-full flex-col items-center gap-1.5"
     >
       <span className="drop-shadow-[0_6px_12px_rgb(0_0_0/0.4)]">{children}</span>
