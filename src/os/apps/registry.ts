@@ -1,0 +1,60 @@
+import {
+  Clapperboard,
+  FileText,
+  Folder,
+  FolderOpen,
+  Gamepad2,
+  Globe,
+  Images,
+  Mail,
+  Music2,
+  ScrollText,
+  Settings2,
+  SquareTerminal,
+  Trash2,
+  UserRound,
+  Eye,
+} from "lucide-react";
+import { Placeholder } from "./Placeholder";
+import type { AppDefinition } from "./types";
+
+export const APP_IDS = [
+  "about",
+  "projects",
+  "folder",
+  "viewer",
+  "note",
+  "cv",
+  "browser",
+  "gallery",
+  "videos",
+  "terminal",
+  "mail",
+  "music",
+  "game",
+  "settings",
+  "bin",
+] as const;
+export type AppId = (typeof APP_IDS)[number];
+
+export const apps: Record<AppId, AppDefinition> = {
+  about: { id: "about", name: "About me", icon: UserRound, tint: "#e9ecf3", component: Placeholder, size: { w: 720, h: 520 }, listed: true, pinned: false, description: "Who I am" },
+  projects: { id: "projects", name: "Projects", icon: FolderOpen, tint: "#8ea7dc", component: Placeholder, size: { w: 860, h: 540 }, listed: true, pinned: true, description: "All my projects" },
+  folder: { id: "folder", name: "Folder", icon: Folder, tint: "#8ea7dc", component: Placeholder, size: { w: 860, h: 560 }, listed: false, pinned: false },
+  viewer: { id: "viewer", name: "Viewer", icon: Eye, tint: "#bccbeb", component: Placeholder, size: { w: 900, h: 620 }, listed: false, pinned: false },
+  note: { id: "note", name: "Notes", icon: FileText, tint: "#e9ecf3", component: Placeholder, size: { w: 560, h: 440 }, listed: false, pinned: false },
+  cv: { id: "cv", name: "Résumé", icon: ScrollText, tint: "#c8a96f", component: Placeholder, size: { w: 780, h: 640 }, listed: true, pinned: false, description: "My CV" },
+  browser: { id: "browser", name: "Browser", icon: Globe, tint: "#9fc3e8", component: Placeholder, size: { w: 940, h: 600 }, listed: true, pinned: true, description: "Find me online" },
+  gallery: { id: "gallery", name: "Gallery", icon: Images, tint: "#d6b6e8", component: Placeholder, size: { w: 860, h: 580 }, listed: true, pinned: true },
+  videos: { id: "videos", name: "Videos", icon: Clapperboard, tint: "#e8a6a6", component: Placeholder, size: { w: 900, h: 580 }, listed: true, pinned: false },
+  terminal: { id: "terminal", name: "Terminal", icon: SquareTerminal, tint: "#9fe0b8", component: Placeholder, size: { w: 720, h: 460 }, listed: true, pinned: true, description: "Type `help`" },
+  mail: { id: "mail", name: "Mail", icon: Mail, tint: "#f0c987", component: Placeholder, size: { w: 620, h: 560 }, listed: true, pinned: true, description: "Contact me" },
+  music: { id: "music", name: "Music", icon: Music2, tint: "#f29fb8", component: Placeholder, size: { w: 420, h: 540 }, listed: true, pinned: false },
+  game: { id: "game", name: "Lunar Drift", icon: Gamepad2, tint: "#a6e3e8", component: Placeholder, size: { w: 560, h: 600 }, listed: true, pinned: false, description: "A tiny game" },
+  settings: { id: "settings", name: "Settings", icon: Settings2, tint: "#b8bfcc", component: Placeholder, size: { w: 700, h: 500 }, listed: true, pinned: true },
+  bin: { id: "bin", name: "Recycle Bin", icon: Trash2, tint: "#b8bfcc", component: Placeholder, size: { w: 720, h: 460 }, listed: false, pinned: false },
+};
+
+export function getApp(id: string): AppDefinition {
+  return apps[id as AppId] ?? apps.about;
+}
