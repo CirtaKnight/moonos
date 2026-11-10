@@ -32,10 +32,13 @@ export function Boot({
   lines,
   short,
   onDone,
+  onQuickView,
 }: {
   lines: string[];
   short: boolean;
   onDone: () => void;
+  /** Recruiter shortcut: skip straight to About + Projects. */
+  onQuickView?: () => void;
 }) {
   const source = (short ? lines.slice(-4) : lines).map(parseBootLine);
   const [phase, setPhase] = useState<"log" | "logo">("log");
@@ -88,9 +91,12 @@ export function Boot({
     return () => clearTimeout(t);
   }, [phase, short, finish]);
 
-  // Skip on any key / pointer.
+  // Skip on any key / pointer (except the Quick view button, which has its own action).
   useEffect(() => {
-    const skip = () => finish();
+    const skip = (e: Event) => {
+      if ((e.target as HTMLElement | null)?.closest?.("[data-quick-view]")) return;
+      finish();
+    };
     window.addEventListener("keydown", skip);
     window.addEventListener("pointerdown", skip);
     return () => {
@@ -156,8 +162,23 @@ export function Boot({
           </motion.div>
         )}
       </AnimatePresence>
-      <p className="pointer-events-none absolute right-4 bottom-4 font-mono text-[10px] tracking-widest text-[#4b5366] uppercase sm:right-8 sm:bottom-6">
-        Press any key to skip
+      {onQuickView && (
+        <button
+          type="button"
+          data-quick-view
+          onClick={() => {
+            if (doneRef.current) return;
+            doneRef.current = true;
+            onQuickView();
+          }}
+          className="absolute bottom-4 left-4 rounded-full border border-[#2a3246] px-3.5 py-1.5 font-mono text-[11px] text-[#bccbeb] transition-colors hover:border-[#bccbeb] hover:bg-[#bccbeb]/10 sm:bottom-6 sm:left-8"
+        >
+          In a hurry? Quick view →
+        </button>
+      )}
+      <p className="pointer-events-none absolute right-4 bottom-5 font-mono text-[10px] tracking-widest text-[#4b5366] uppercase sm:right-8 sm:bottom-7">
+        <span className="hidden sm:inline">Press any key to skip</span>
+        <span className="sm:hidden">Tap to skip</span>
       </p>
     </div>
   );

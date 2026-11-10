@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Boot } from "./components/Boot";
 import { LogoMark } from "./components/Logo";
 import { ContentProvider } from "./content/ContentProvider";
@@ -11,6 +11,7 @@ import { useMediaQuery } from "./hooks";
 import { Phone } from "./mobile/Phone";
 import { usePhone } from "./store/phone";
 import { usePower } from "./store/power";
+import { launchQuickView } from "./useDeepLinks";
 import { useSettings } from "./store/settings";
 
 export const PHONE_QUERY = "(max-width: 767px), (pointer: coarse) and (max-height: 500px)";
@@ -32,6 +33,10 @@ export function OS({ content }: { content: OSContent }) {
   const fullBoot = usePower((s) => s.fullBoot);
   // Phones (and phone-sized landscape screens) get the phone shell instead of a shrunken desktop.
   const isPhone = useMediaQuery(PHONE_QUERY);
+  // Visitors arriving on a shared link get the short boot.
+  const [deepLinked] = useState(
+    () => typeof window !== "undefined" && /[?&](open|quick)/.test(window.location.search),
+  );
 
   useEffect(() => {
     usePhone.getState().setActive(isPhone);
@@ -42,14 +47,21 @@ export function OS({ content }: { content: OSContent }) {
     usePower.getState().bootDone();
   };
 
+  const onQuickView = () => {
+    onBootDone();
+    // Wait for the shell to measure itself before tiling windows.
+    setTimeout(launchQuickView, 150);
+  };
+
   return (
     <ContentProvider content={content}>
       {power === "booting" &&
         (hydrated ? (
           <Boot
             lines={content.settings.bootLines}
-            short={hasBooted && !fullBoot}
+            short={(hasBooted || deepLinked) && !fullBoot}
             onDone={onBootDone}
+            onQuickView={onQuickView}
           />
         ) : (
           <div className="fixed inset-0 bg-[#030409]" />
