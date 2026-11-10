@@ -59,7 +59,7 @@ test.describe("desktop", () => {
   test("search finds a project", async ({ page }) => {
     await boot(page);
     await page.keyboard.press("Control+k");
-    await page.getByRole("dialog", { name: "Search" }).getByLabel("Search").fill("cirta");
+    await page.getByRole("dialog", { name: "Search" }).getByLabel("Search").fill("moonos");
     await page.keyboard.press("Enter");
     await expect(page.getByRole("dialog", { name: "MoonOS" })).toBeVisible();
   });
