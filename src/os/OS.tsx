@@ -1,14 +1,19 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Boot } from "./components/Boot";
 import { LogoMark } from "./components/Logo";
 import { ContentProvider } from "./content/ContentProvider";
 import type { OSContent } from "./content/types";
 import { Desktop } from "./Desktop";
+import { useMediaQuery } from "./hooks";
+import { Phone } from "./mobile/Phone";
+import { usePhone } from "./store/phone";
 import { usePower } from "./store/power";
 import { useSettings } from "./store/settings";
+
+export const PHONE_QUERY = "(max-width: 767px), (pointer: coarse) and (max-height: 500px)";
 
 function subscribeHydration(cb: () => void) {
   return useSettings.persist.onFinishHydration(cb);
@@ -25,6 +30,12 @@ export function OS({ content }: { content: OSContent }) {
   const markBooted = useSettings((s) => s.markBooted);
   const power = usePower((s) => s.state);
   const fullBoot = usePower((s) => s.fullBoot);
+  // Phones (and phone-sized landscape screens) get the phone shell instead of a shrunken desktop.
+  const isPhone = useMediaQuery(PHONE_QUERY);
+
+  useEffect(() => {
+    usePhone.getState().setActive(isPhone);
+  }, [isPhone]);
 
   const onBootDone = () => {
     markBooted();
@@ -43,7 +54,7 @@ export function OS({ content }: { content: OSContent }) {
         ) : (
           <div className="fixed inset-0 bg-[#030409]" />
         ))}
-      {power === "on" && <Desktop />}
+      {power === "on" && (isPhone ? <Phone /> : <Desktop />)}
       <AnimatePresence>
         {(power === "shutting-down" || power === "off") && <PowerOff key="off" off={power === "off"} />}
       </AnimatePresence>
