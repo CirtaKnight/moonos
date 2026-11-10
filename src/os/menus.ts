@@ -12,7 +12,6 @@ import {
   Maximize2,
   Minimize2,
   Minus,
-  Moon,
   PanelLeft,
   PanelRight,
   Pin,
@@ -20,7 +19,6 @@ import {
   Settings2,
   Shapes,
   SquareTerminal,
-  Sun,
   X,
 } from "lucide-react";
 import { apps, type AppId } from "./apps/registry";
@@ -51,14 +49,6 @@ export function desktopMenu(content: OSContent, entries: DesktopEntry[], rows: n
         checked: s.wallpaper === w.id,
         onSelect: () => s.setWallpaper(w.id),
       })),
-    },
-    {
-      label: "Theme",
-      icon: s.theme === "night" ? Moon : Sun,
-      submenu: [
-        { label: "Night", icon: Moon, checked: s.theme === "night", onSelect: () => s.setTheme("night") },
-        { label: "Day", icon: Sun, checked: s.theme === "day", onSelect: () => s.setTheme("day") },
-      ],
     },
     {
       label: "Sort icons by",

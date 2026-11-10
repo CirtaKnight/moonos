@@ -35,28 +35,24 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#06080f" },
-    { media: "(prefers-color-scheme: light)", color: "#e9e5dc" },
-  ],
+  themeColor: "#06080f",
 };
 
 /**
- * Applies the visitor's saved theme before first paint, so Day mode never flashes Night.
+ * Applies the visitor's saved "reduce motion" preference before first paint.
  * Reads the same localStorage key the settings store persists to.
  */
-const themeInit = `(function(){try{var s=JSON.parse(localStorage.getItem('ck-os-settings')||'{}').state||{};var d=document.documentElement;d.dataset.theme=s.theme||'night';if(s.reduceMotion)d.dataset.motion='reduced';}catch(e){document.documentElement.dataset.theme='night';}})();`;
+const motionInit = `(function(){try{var s=JSON.parse(localStorage.getItem('ck-os-settings')||'{}').state||{};if(s.reduceMotion)document.documentElement.dataset.motion='reduced';}catch(e){}})();`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-theme="night"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} antialiased`}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <script dangerouslySetInnerHTML={{ __html: motionInit }} />
       </head>
       <body>{children}</body>
     </html>

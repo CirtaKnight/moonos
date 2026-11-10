@@ -65,10 +65,10 @@ describe("terminal", () => {
     expect(r.effects).toContainEqual({ type: "openApp", app: "mail" });
   });
 
-  it("emits clear / exit / theme effects", () => {
+  it("emits clear / exit effects", () => {
     expect(run("clear").effects).toEqual([{ type: "clear" }]);
     expect(run("exit").effects).toEqual([{ type: "exit" }]);
-    expect(run("theme day").effects).toEqual([{ type: "theme", value: "day" }]);
+    expect(run("theme day").effects).toEqual([]);
   });
 
   it("completes commands and paths", () => {

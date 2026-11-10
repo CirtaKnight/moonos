@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Info, Monitor, Moon, Palette, RotateCcw, Sun, Volume2 } from "lucide-react";
+import { Check, Info, Monitor, RotateCcw, Volume2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { LogoMark } from "../components/Logo";
 import { MoonGlyph } from "../components/MoonGlyph";
@@ -9,12 +9,11 @@ import { useNow } from "../hooks";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
 import { play } from "../lib/sound";
 import { usePower } from "../store/power";
-import { useSettings, type ShellLayout, type Theme } from "../store/settings";
+import { useSettings, type ShellLayout } from "../store/settings";
 import type { AppProps } from "./types";
 import { Button, Scroll } from "./ui";
 
 const SECTIONS = [
-  { id: "appearance", label: "Appearance", icon: Palette },
   { id: "desktop", label: "Desktop", icon: Monitor },
   { id: "sound", label: "Sound, cursor & motion", icon: Volume2 },
   { id: "about", label: "About this OS", icon: Info },
@@ -31,7 +30,7 @@ const SWATCH: Record<string, string> = {
 };
 
 export function Settings({ params }: AppProps) {
-  const [section, setSection] = useState<Section>((params.section as Section) ?? "appearance");
+  const [section, setSection] = useState<Section>((params.section as Section) ?? "desktop");
   return (
     <div className="flex h-full">
       <nav className="flex w-14 shrink-0 flex-col gap-1 border-r border-line bg-surface-2 p-2 sm:w-48">
@@ -52,7 +51,6 @@ export function Settings({ params }: AppProps) {
       </nav>
       <div className="min-w-0 flex-1">
         <Scroll className="p-5 sm:p-6">
-          {section === "appearance" && <Appearance />}
           {section === "desktop" && <DesktopSection />}
           {section === "sound" && <SoundMotion />}
           {section === "about" && <AboutOS />}
@@ -94,31 +92,6 @@ function Choice({ selected, onClick, label, children }: { selected: boolean; onC
       </span>
       <span className={`text-xs ${selected ? "text-fg" : "text-muted"}`}>{label}</span>
     </button>
-  );
-}
-
-function Appearance() {
-  const theme = useSettings((s) => s.theme);
-  const setTheme = useSettings((s) => s.setTheme);
-  const options: { id: Theme; label: string; icon: typeof Moon; bg: string; fg: string }[] = [
-    { id: "night", label: "Night", icon: Moon, bg: "#0b0f1a", fg: "#e9ecf3" },
-    { id: "day", label: "Day", icon: Sun, bg: "#efebe2", fg: "#171a23" },
-  ];
-  return (
-    <Group title="Theme" hint="Night is the default. Day trades midnight for ivory and stone.">
-      <div className="grid max-w-md grid-cols-2 gap-4">
-        {options.map((o) => (
-          <Choice key={o.id} selected={theme === o.id} onClick={() => setTheme(o.id)} label={o.label}>
-            <span className="flex aspect-[4/3] flex-col gap-1.5 p-3" style={{ background: o.bg, color: o.fg }}>
-              <span className="h-2 w-full rounded-sm opacity-20" style={{ background: o.fg }} />
-              <span className="mt-auto flex items-center gap-2 text-xs font-medium">
-                <o.icon size={14} /> {o.label}
-              </span>
-            </span>
-          </Choice>
-        ))}
-      </div>
-    </Group>
   );
 }
 

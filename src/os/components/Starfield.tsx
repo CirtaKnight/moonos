@@ -61,7 +61,6 @@ function makeStars(w: number, h: number): Star[] {
  */
 export function Starfield({ dim = false }: { dim?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const theme = useSettings((s) => s.theme);
   const reduceMotion = useSettings((s) => s.reduceMotion);
 
   useEffect(() => {
@@ -70,7 +69,6 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const release = trackPointer();
-    const day = theme === "day";
     const prefersReduced = reduceMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let w = 0;
@@ -104,15 +102,9 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
 
       // Sky
       const sky = ctx.createLinearGradient(0, 0, 0, h);
-      if (day) {
-        sky.addColorStop(0, "#c9d3e6");
-        sky.addColorStop(0.55, "#e7dfd2");
-        sky.addColorStop(1, "#f1e3cf");
-      } else {
-        sky.addColorStop(0, "#070a16");
-        sky.addColorStop(0.6, "#05070f");
-        sky.addColorStop(1, "#030409");
-      }
+      sky.addColorStop(0, "#070a16");
+      sky.addColorStop(0.6, "#05070f");
+      sky.addColorStop(1, "#030409");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, w, h);
 
@@ -122,29 +114,21 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
       const my = h * 0.12 - oy * 12;
       const lean = { x: ox * R * 0.12, y: oy * R * 0.12 };
       const halo = ctx.createRadialGradient(mx + lean.x, my + lean.y, R * 0.85, mx, my, R * 2.1);
-      halo.addColorStop(0, day ? "rgba(255,250,236,0.75)" : "rgba(188,203,235,0.22)");
+      halo.addColorStop(0, "rgba(188,203,235,0.22)");
       halo.addColorStop(1, "rgba(188,203,235,0)");
       ctx.fillStyle = halo;
       ctx.fillRect(0, 0, w, h);
       ctx.beginPath();
       ctx.arc(mx, my, R, 0, Math.PI * 2);
-      if (day) {
-        const disc = ctx.createRadialGradient(mx - R * 0.3, my - R * 0.3, 0, mx, my, R);
-        disc.addColorStop(0, "#fffdf7");
-        disc.addColorStop(1, "#e7ddc9");
-        ctx.fillStyle = disc;
-        ctx.fill();
-      } else {
-        ctx.fillStyle = "#04060d";
-        ctx.fill();
-        // Bright rim on the side facing the pointer
-        const rim = ctx.createRadialGradient(mx + lean.x * 2.4, my + lean.y * 2.4, R * 0.9, mx, my, R * 1.03);
-        rim.addColorStop(0, "rgba(233,236,243,0)");
-        rim.addColorStop(1, "rgba(233,236,243,0.5)");
-        ctx.strokeStyle = rim;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
+      ctx.fillStyle = "#04060d";
+      ctx.fill();
+      // Bright rim on the side facing the pointer
+      const rim = ctx.createRadialGradient(mx + lean.x * 2.4, my + lean.y * 2.4, R * 0.9, mx, my, R * 1.03);
+      rim.addColorStop(0, "rgba(233,236,243,0)");
+      rim.addColorStop(1, "rgba(233,236,243,0.5)");
+      ctx.strokeStyle = rim;
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
       // Stars
       const near: { x: number; y: number }[] = [];
@@ -153,8 +137,8 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
         const y = s.y - oy * PARALLAX * s.depth;
         if (x < -4 || y < -4 || x > w + 4 || y > h + 4) continue;
         const tw = prefersReduced ? 1 : 0.65 + 0.35 * Math.sin(t * s.speed + s.phase);
-        const a = s.base * tw * (day ? 0.35 : 1) * (y > h * 0.85 ? 0.6 : 1);
-        ctx.fillStyle = day ? `rgba(70,84,120,${a})` : `rgba(233,236,243,${a})`;
+        const a = s.base * tw * (y > h * 0.85 ? 0.6 : 1);
+        ctx.fillStyle = `rgba(233,236,243,${a})`;
         ctx.beginPath();
         ctx.arc(x, y, s.r, 0, Math.PI * 2);
         ctx.fill();
@@ -174,7 +158,7 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
             const mxp = (near[i].x + near[j].x) / 2;
             const myp = (near[i].y + near[j].y) / 2;
             const fade = 1 - Math.hypot(mxp - pointer.x, myp - pointer.y) / LINK_RADIUS;
-            ctx.strokeStyle = day ? `rgba(59,88,148,${0.35 * fade})` : `rgba(188,203,235,${0.45 * fade})`;
+            ctx.strokeStyle = `rgba(188,203,235,${0.45 * fade})`;
             ctx.beginPath();
             ctx.moveTo(near[i].x, near[i].y);
             ctx.lineTo(near[j].x, near[j].y);
@@ -184,7 +168,7 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
       }
 
       // Shooting stars
-      if (!prefersReduced && !day) {
+      if (!prefersReduced) {
         if (!shooting && now > nextShoot) {
           const fromLeft = Math.random() < 0.5;
           shooting = {
@@ -220,7 +204,7 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
       // Horizon haze
       const haze = ctx.createLinearGradient(0, h * 0.6, 0, h);
       haze.addColorStop(0, "rgba(0,0,0,0)");
-      haze.addColorStop(1, day ? "rgba(160,140,110,0.18)" : "rgba(3,4,9,0.7)");
+      haze.addColorStop(1, "rgba(3,4,9,0.7)");
       ctx.fillStyle = haze;
       ctx.fillRect(0, h * 0.6, w, h * 0.4);
     };
@@ -238,7 +222,7 @@ export function Starfield({ dim = false }: { dim?: boolean }) {
       window.removeEventListener("resize", resize);
       release();
     };
-  }, [theme, reduceMotion]);
+  }, [reduceMotion]);
 
   return (
     <canvas

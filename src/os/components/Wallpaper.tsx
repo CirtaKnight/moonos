@@ -10,7 +10,6 @@ import { Starfield } from "./Starfield";
  */
 export function Wallpaper() {
   const id = useSettings((s) => s.wallpaper);
-  const theme = useSettings((s) => s.theme);
   const { settings } = useContent();
   const custom = settings.wallpapers.find((w) => w.id === id && w.url);
 
@@ -24,11 +23,10 @@ export function Wallpaper() {
     );
   }
 
-  const day = theme === "day";
   if (id === "starfield") return <Starfield />;
-  if (id === "tide") return <Tide day={day} />;
-  if (id === "dune") return <Dune day={day} />;
-  return <Eclipse day={day} />;
+  if (id === "tide") return <Tide />;
+  if (id === "dune") return <Dune />;
+  return <Eclipse />;
 }
 
 /** Faint glyph-like lattice laid over every built-in wallpaper. */
@@ -54,19 +52,17 @@ function Lattice({ opacity }: { opacity: number }) {
   );
 }
 
-function Eclipse({ day }: { day: boolean }) {
+function Eclipse() {
   return (
     <div
       className="absolute inset-0 overflow-hidden"
       aria-hidden
       style={{
-        background: day
-          ? "radial-gradient(120% 90% at 75% 20%, #f6f2ea 0%, #e3ddd0 45%, #cfc7b6 100%)"
-          : "radial-gradient(120% 90% at 75% 18%, #18213a 0%, #0a0e1a 42%, #04060c 100%)",
-        color: day ? "#5b5140" : "#bccbeb",
+        background: "radial-gradient(120% 90% at 75% 18%, #18213a 0%, #0a0e1a 42%, #04060c 100%)",
+        color: "#bccbeb",
       }}
     >
-      <Lattice opacity={day ? 0.08 : 0.06} />
+      <Lattice opacity={0.06} />
       {/* The eclipsed moon: a dark disc with a bright rim, partly off-screen */}
       <div
         className="absolute rounded-full"
@@ -75,41 +71,33 @@ function Eclipse({ day }: { day: boolean }) {
           aspectRatio: "1",
           right: "-12vw",
           top: "-14vh",
-          background: day
-            ? "radial-gradient(circle at 40% 40%, #fffdf8 0%, #efe8da 60%, #e1d8c5 100%)"
-            : "radial-gradient(circle at 38% 38%, #0b1020 0%, #070a14 70%)",
-          boxShadow: day
-            ? "0 0 120px 30px rgb(255 252 240 / 0.7)"
-            : "inset 18px -10px 40px rgb(188 203 235 / 0.22), 0 0 80px 6px rgb(188 203 235 / 0.16), 0 0 260px 40px rgb(142 167 220 / 0.08)",
+          background: "radial-gradient(circle at 38% 38%, #0b1020 0%, #070a14 70%)",
+          boxShadow: "inset 18px -10px 40px rgb(188 203 235 / 0.22), 0 0 80px 6px rgb(188 203 235 / 0.16), 0 0 260px 40px rgb(142 167 220 / 0.08)",
         }}
       />
-      {!day && <Stars />}
+      <Stars />
       <div
         className="absolute inset-x-0 bottom-0 h-1/2"
         style={{
-          background: day
-            ? "linear-gradient(0deg, rgb(160 146 118 / 0.25), transparent)"
-            : "linear-gradient(0deg, rgb(3 4 9 / 0.85), transparent)",
+          background: "linear-gradient(0deg, rgb(3 4 9 / 0.85), transparent)",
         }}
       />
     </div>
   );
 }
 
-function Tide({ day }: { day: boolean }) {
+function Tide() {
   return (
     <div
       className="absolute inset-0 overflow-hidden"
       aria-hidden
       style={{
-        background: day
-          ? "linear-gradient(180deg, #dfe6ef 0%, #c9d4e3 55%, #9fb0c8 100%)"
-          : "linear-gradient(180deg, #0a1022 0%, #0c1530 55%, #050912 100%)",
-        color: day ? "#2c4478" : "#bccbeb",
+        background: "linear-gradient(180deg, #0a1022 0%, #0c1530 55%, #050912 100%)",
+        color: "#bccbeb",
       }}
     >
-      <Lattice opacity={day ? 0.07 : 0.05} />
-      {!day && <Stars />}
+      <Lattice opacity={0.05} />
+      <Stars />
       <div
         className="absolute left-1/2 rounded-full"
         style={{
@@ -117,8 +105,8 @@ function Tide({ day }: { day: boolean }) {
           aspectRatio: "1",
           top: "18%",
           transform: "translateX(-50%)",
-          background: day ? "#fbfaf6" : "radial-gradient(circle at 40% 35%, #f3f5fa, #c7d0e2)",
-          boxShadow: day ? "0 0 60px rgb(255 255 255 / 0.8)" : "0 0 90px 10px rgb(188 203 235 / 0.25)",
+          background: "radial-gradient(circle at 40% 35%, #f3f5fa, #c7d0e2)",
+          boxShadow: "0 0 90px 10px rgb(188 203 235 / 0.25)",
         }}
       />
       <svg className="absolute inset-x-0 bottom-0 h-[42%] w-full" preserveAspectRatio="none" viewBox="0 0 100 40">
@@ -126,30 +114,28 @@ function Tide({ day }: { day: boolean }) {
           <path
             key={i}
             d={`M0 ${6 + i * 4} Q 25 ${4 + i * 4} 50 ${6 + i * 4} T 100 ${6 + i * 4} V40 H0Z`}
-            fill={day ? "#2c4478" : "#8ea7dc"}
+            fill={"#8ea7dc"}
             opacity={0.03 + i * 0.012}
           />
         ))}
-        <rect x="47" y="2" width="6" height="38" fill={day ? "#ffffff" : "#bccbeb"} opacity="0.08" />
+        <rect x="47" y="2" width="6" height="38" fill={"#bccbeb"} opacity="0.08" />
       </svg>
     </div>
   );
 }
 
-function Dune({ day }: { day: boolean }) {
+function Dune() {
   return (
     <div
       className="absolute inset-0 overflow-hidden"
       aria-hidden
       style={{
-        background: day
-          ? "linear-gradient(180deg, #f3e6d3 0%, #e9d2b0 50%, #c99e6c 100%)"
-          : "linear-gradient(180deg, #0b0d1a 0%, #1b1a2e 45%, #3a2a2a 75%, #1a120f 100%)",
-        color: day ? "#7a5a30" : "#c8a96f",
+        background: "linear-gradient(180deg, #0b0d1a 0%, #1b1a2e 45%, #3a2a2a 75%, #1a120f 100%)",
+        color: "#c8a96f",
       }}
     >
       <Lattice opacity={0.05} />
-      {!day && <Stars />}
+      <Stars />
       <div
         className="absolute rounded-full"
         style={{
@@ -157,14 +143,14 @@ function Dune({ day }: { day: boolean }) {
           aspectRatio: "1",
           left: "18%",
           top: "16%",
-          boxShadow: day ? "inset -14px 6px 0 0 #fff8ec" : "inset -14px 6px 0 0 #e9dcc0",
-          filter: day ? "none" : "drop-shadow(0 0 18px rgb(233 220 192 / 0.4))",
+          boxShadow: "inset -14px 6px 0 0 #e9dcc0",
+          filter: "drop-shadow(0 0 18px rgb(233 220 192 / 0.4))",
         }}
       />
       <svg className="absolute inset-x-0 bottom-0 h-1/2 w-full" preserveAspectRatio="none" viewBox="0 0 100 50">
-        <path d="M0 30 Q 30 14 55 26 T 100 20 V50 H0Z" fill={day ? "#d9b07a" : "#2a1d1b"} />
-        <path d="M0 38 Q 40 24 70 34 T 100 32 V50 H0Z" fill={day ? "#c4925a" : "#1c1312"} />
-        <path d="M0 46 Q 30 38 60 44 T 100 42 V50 H0Z" fill={day ? "#a87443" : "#120c0b"} />
+        <path d="M0 30 Q 30 14 55 26 T 100 20 V50 H0Z" fill={"#2a1d1b"} />
+        <path d="M0 38 Q 40 24 70 34 T 100 32 V50 H0Z" fill={"#1c1312"} />
+        <path d="M0 46 Q 30 38 60 44 T 100 42 V50 H0Z" fill={"#120c0b"} />
       </svg>
     </div>
   );

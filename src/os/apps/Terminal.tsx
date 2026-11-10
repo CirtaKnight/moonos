@@ -6,7 +6,6 @@ import { complete, promptPath, runCommand, type Line, type Tone } from "../lib/t
 import { useAchievements } from "../store/achievements";
 import { usePhone } from "../store/phone";
 import { usePower } from "../store/power";
-import { useSettings } from "../store/settings";
 import { useWindows } from "../store/windows";
 import { openApp, openItem, openProject } from "./launch";
 import type { AppId } from "./registry";
@@ -30,7 +29,7 @@ const toneClass: Record<Tone, string> = {
 
 let entrySeq = 0;
 
-/** Always dark, whatever the theme: terminals are night creatures. */
+/** Terminals are night creatures. */
 export function Terminal({ windowId, screenId }: AppProps) {
   const content = useContent();
   const user = content.profile.handle;
@@ -82,12 +81,6 @@ export function Terminal({ windowId, screenId }: AppProps) {
         case "restart":
           setTimeout(() => usePower.getState().restart(), 400);
           break;
-        case "theme": {
-          const s = useSettings.getState();
-          if (fx.value === "toggle") s.toggleTheme();
-          else s.setTheme(fx.value);
-          break;
-        }
         case "openApp":
           openApp(fx.app as AppId);
           break;

@@ -144,7 +144,6 @@ export function Boot({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="grid h-full place-items-center"
-            data-theme="night"
           >
             <div className="flex flex-col items-center gap-6">
               <LogoMark size={short ? 84 : 112} animate />

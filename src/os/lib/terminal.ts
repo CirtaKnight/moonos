@@ -12,7 +12,6 @@ export type Effect =
   | { type: "clear" }
   | { type: "exit" }
   | { type: "restart" }
-  | { type: "theme"; value: "night" | "day" | "toggle" }
   | { type: "openApp"; app: string }
   | { type: "openProject"; slug: string; title: string }
   | { type: "openItem"; slug: string; item: ProjectItem }
@@ -137,7 +136,6 @@ export const COMMANDS: Record<string, string> = {
   contact: "send me a message",
   neofetch: "system info",
   moon: "tonight's moon",
-  theme: "theme night|day",
   date: "current date",
   echo: "print text",
   history: "command history",
@@ -294,13 +292,9 @@ export function runCommand(
       say("Someone is always watching over the night shift.", "muted");
       break;
     }
-    case "theme": {
-      const v = args[0]?.toLowerCase();
-      if (v === "night" || v === "day") effects.push({ type: "theme", value: v });
-      else effects.push({ type: "theme", value: "toggle" });
-      say("Theme updated.", "muted");
+    case "theme":
+      say("MoonOS only knows one theme: night. 🌙", "muted");
       break;
-    }
     case "date":
       say((ctx.now ?? new Date()).toUTCString());
       break;

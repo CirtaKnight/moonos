@@ -3,12 +3,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type Theme = "night" | "day";
 export type ShellLayout = "dock" | "taskbar";
 export type IconCell = { c: number; r: number };
 
 export interface SettingsData {
-  theme: Theme;
   layout: ShellLayout;
   wallpaper: string;
   sound: boolean;
@@ -27,8 +25,6 @@ export interface SettingsData {
 }
 
 export interface SettingsState extends SettingsData {
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
   setLayout: (layout: ShellLayout) => void;
   setWallpaper: (id: string) => void;
   setSound: (on: boolean) => void;
@@ -41,15 +37,13 @@ export interface SettingsState extends SettingsData {
   setIconLayout: (layout: Record<string, IconCell>) => void;
 }
 
-function applyToDocument(theme: Theme, reduceMotion: boolean) {
+function applyToDocument(reduceMotion: boolean) {
   if (typeof document === "undefined") return;
-  document.documentElement.dataset.theme = theme;
   if (reduceMotion) document.documentElement.dataset.motion = "reduced";
   else delete document.documentElement.dataset.motion;
 }
 
 const DEFAULTS: SettingsData = {
-  theme: "night",
   layout: "dock",
   wallpaper: "starfield",
   sound: false,
@@ -68,16 +62,11 @@ export const useSettings = create<SettingsState>()(
   persist(
     (set, get) => ({
       ...DEFAULTS,
-      setTheme: (theme) => {
-        applyToDocument(theme, get().reduceMotion);
-        set({ theme });
-      },
-      toggleTheme: () => get().setTheme(get().theme === "night" ? "day" : "night"),
       setLayout: (layout) => set({ layout }),
       setWallpaper: (wallpaper) => set({ wallpaper }),
       setSound: (sound) => set({ sound }),
       setReduceMotion: (reduceMotion) => {
-        applyToDocument(get().theme, reduceMotion);
+        applyToDocument(reduceMotion);
         set({ reduceMotion });
       },
       setCustomCursor: (customCursor) => set({ customCursor }),
@@ -88,16 +77,17 @@ export const useSettings = create<SettingsState>()(
       setIconLayout: (iconLayout) => set({ iconLayout }),
     }),
     {
-      // Keep in sync with the theme init script in app/layout.tsx.
+      // Keep in sync with the motion init script in app/layout.tsx.
       name: "ck-os-settings",
-      version: 2,
+      version: 3,
       // v1 → v2 (MoonOS): new fields get defaults; everyone gets the new animated wallpaper once.
+      // v2 → v3: the Day theme was removed, so the stored `theme` is dropped.
       migrate: (persisted, version) => {
-        const old = (persisted ?? {}) as Partial<SettingsData>;
+        const { theme: _drop, ...old } = (persisted ?? {}) as Partial<SettingsData> & { theme?: string };
+        void _drop;
         return { ...DEFAULTS, ...old, ...(version < 2 ? { wallpaper: "starfield" } : {}) };
       },
       partialize: (s): SettingsData => ({
-        theme: s.theme,
         layout: s.layout,
         wallpaper: s.wallpaper,
         sound: s.sound,

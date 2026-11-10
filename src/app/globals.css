@@ -2,11 +2,9 @@
 
 /* ------------------------------------------------------------------
    MoonOS — design tokens
-   Night (default): midnight surfaces, moon-silver text, pale lunar accent.
-   Day: ivory / stone surfaces, ink text, deeper lunar blue accent.
+   Midnight surfaces, moon-silver text, a pale lunar accent and a rare muted gold.
    ------------------------------------------------------------------ */
-:root,
-:root[data-theme="night"] {
+:root {
   --bg: #06080f;
   --bg-2: #0b0f1a;
   --surface: rgb(16 20 32 / 0.72);
@@ -28,30 +26,6 @@
   --shadow: 0 24px 60px -12px rgb(0 0 0 / 0.65), 0 2px 6px rgb(0 0 0 / 0.4);
   --glow: 0 0 0 1px rgb(188 203 235 / 0.35), 0 0 24px rgb(188 203 235 / 0.18);
   color-scheme: dark;
-}
-
-:root[data-theme="day"] {
-  --bg: #e9e5dc;
-  --bg-2: #f3f0e9;
-  --surface: rgb(250 248 243 / 0.78);
-  --surface-solid: #f8f6f1;
-  --window-bg: rgb(247 245 239 / 0.96);
-  --surface-2: rgb(20 24 36 / 0.04);
-  --surface-hover: rgb(20 24 36 / 0.07);
-  --border: rgb(30 36 52 / 0.1);
-  --border-strong: rgb(30 36 52 / 0.2);
-  --text: #171a23;
-  --text-muted: #5a6172;
-  --text-faint: #8a90a0;
-  --accent: #3b5894;
-  --accent-strong: #2c4478;
-  --accent-ink: #f8f6f1;
-  --gold: #9c7a3a;
-  --danger: #b6474a;
-  --success: #2f8a57;
-  --shadow: 0 24px 60px -16px rgb(40 36 28 / 0.35), 0 2px 6px rgb(40 36 28 / 0.12);
-  --glow: 0 0 0 1px rgb(59 88 148 / 0.35), 0 0 24px rgb(59 88 148 / 0.15);
-  color-scheme: light;
 }
 
 @theme inline {

@@ -16,10 +16,10 @@ test.describe("MoonOS v2 — desktop", () => {
     const menu = page.getByRole("menu").first();
     await expect(menu).toBeVisible();
     await expect(menu.getByRole("menuitem", { name: /Open Terminal/ })).toBeVisible();
-    await menu.getByRole("menuitem", { name: /Theme/ }).hover();
-    await expect(page.getByRole("menuitem", { name: "Day" })).toBeVisible();
-    await page.getByRole("menuitem", { name: "Day" }).click();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "day");
+    await menu.getByRole("menuitem", { name: /Wallpaper/ }).hover();
+    await expect(page.getByRole("menuitem", { name: "Eclipse" })).toBeVisible();
+    await page.getByRole("menuitem", { name: "Eclipse" }).click();
+    await expect(page.getByRole("menu")).toHaveCount(0);
   });
 
   test("dragged icons keep their place after a reload", async ({ page }) => {

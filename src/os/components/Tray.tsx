@@ -1,9 +1,8 @@
 "use client";
 
-import { Bell, Moon, Search, Sun } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { useNow } from "../hooks";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
-import { useSettings } from "../store/settings";
 import { useUI } from "../store/ui";
 import { MoonGlyph } from "./MoonGlyph";
 
@@ -69,19 +68,14 @@ export function TrayButton({
   );
 }
 
-/** Search, theme, notifications — shared by the menu bar and the taskbar. */
+/** Search and notifications — shared by the menu bar and the taskbar. */
 export function TrayActions() {
   const panel = useUI((s) => s.panel);
   const togglePanel = useUI((s) => s.togglePanel);
-  const theme = useSettings((s) => s.theme);
-  const toggleTheme = useSettings((s) => s.toggleTheme);
   return (
     <>
       <TrayButton label="Search (Ctrl+K)" onClick={() => togglePanel("search")} active={panel === "search"}>
         <Search size={15} />
-      </TrayButton>
-      <TrayButton label={theme === "night" ? "Switch to Day" : "Switch to Night"} onClick={toggleTheme}>
-        {theme === "night" ? <Moon size={15} /> : <Sun size={15} />}
       </TrayButton>
       <TrayButton label="Notifications" onClick={() => togglePanel("notifications")} active={panel === "notifications"}>
         <Bell size={15} />
