@@ -3,13 +3,21 @@
 import { create } from "zustand";
 import { play } from "../lib/sound";
 
+export type NoticeSource = "system" | "github" | "linkedin" | "trophy" | "calendar" | "star" | "generic";
+
 export interface Notice {
   id: string;
   title: string;
   body?: string;
   at: number;
+  /** Original time of the event (e.g. a GitHub push), shown instead of "now". */
+  time?: string;
+  source?: NoticeSource;
   /** What happens when the notification is clicked. */
-  action?: { type: "project"; slug: string; title: string } | { type: "app"; app: string };
+  action?:
+    | { type: "project"; slug: string; title: string }
+    | { type: "app"; app: string; params?: Record<string, string> }
+    | { type: "url"; href: string };
 }
 
 interface NotificationsState {
