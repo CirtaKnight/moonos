@@ -20,6 +20,7 @@ import { Browser } from "./Browser";
 import { CV } from "./CV";
 import { Folder as FolderApp } from "./Folder";
 import { Gallery, Videos } from "./Media";
+import { Mail as MailApp } from "./Mail";
 import { Note } from "./Note";
 import { Bin } from "./Bin";
 import { Placeholder } from "./Placeholder";
@@ -59,7 +60,7 @@ export const apps: Record<AppId, AppDefinition> = {
   gallery: { id: "gallery", name: "Gallery", icon: Images, tint: "#d6b6e8", component: Gallery, size: { w: 860, h: 580 }, listed: true, pinned: true },
   videos: { id: "videos", name: "Videos", icon: Clapperboard, tint: "#e8a6a6", component: Videos, size: { w: 900, h: 580 }, listed: true, pinned: false },
   terminal: { id: "terminal", name: "Terminal", icon: SquareTerminal, tint: "#9fe0b8", component: Terminal, size: { w: 720, h: 460 }, listed: true, pinned: true, description: "Type `help`" },
-  mail: { id: "mail", name: "Mail", icon: Mail, tint: "#f0c987", component: Placeholder, size: { w: 620, h: 560 }, listed: true, pinned: true, description: "Contact me" },
+  mail: { id: "mail", name: "Mail", icon: Mail, tint: "#f0c987", component: MailApp, size: { w: 620, h: 560 }, listed: true, pinned: true, description: "Contact me" },
   music: { id: "music", name: "Music", icon: Music2, tint: "#f29fb8", component: Placeholder, size: { w: 420, h: 540 }, listed: true, pinned: false },
   game: { id: "game", name: "Lunar Drift", icon: Gamepad2, tint: "#a6e3e8", component: Placeholder, size: { w: 560, h: 600 }, listed: true, pinned: false, description: "A tiny game" },
   settings: { id: "settings", name: "Settings", icon: Settings2, tint: "#b8bfcc", component: Settings, size: { w: 700, h: 500 }, listed: true, pinned: true },
