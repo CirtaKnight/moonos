@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import { DesktopIcons } from "./components/DesktopIcons";
+import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
+import { Spotlight } from "./components/Spotlight";
 import { DOCK_RESERVED, Dock, MENUBAR_H, MenuBar, TASKBAR_H, Taskbar } from "./components/Shell";
 import { StartMenu } from "./components/StartMenu";
 import { Wallpaper } from "./components/Wallpaper";
@@ -22,6 +24,7 @@ export function Desktop() {
   const togglePanel = useUI((s) => s.togglePanel);
   const selectIcon = useUI((s) => s.selectIcon);
   const snapPreview = useUI((s) => s.snapPreview);
+  useStartupNotifications();
 
   // Usable area for windows depends on the shell layout.
   useEffect(() => {
@@ -97,6 +100,8 @@ export function Desktop() {
       )}
 
       <AnimatePresence>{panel === "start" && <StartMenu key="start" />}</AnimatePresence>
+      <NotificationLayer />
+      <AnimatePresence>{panel === "search" && <Spotlight key="search" />}</AnimatePresence>
     </motion.div>
   );
 }
