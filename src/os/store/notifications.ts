@@ -24,7 +24,8 @@ interface NotificationsState {
   items: Notice[];
   /** Ids currently shown as toasts. */
   toasts: string[];
-  push: (n: Omit<Notice, "at">) => void;
+  /** Adds a notification; `toast: false` files it in the center silently. */
+  push: (n: Omit<Notice, "at">, opts?: { toast?: boolean }) => void;
   dismissToast: (id: string) => void;
   clear: () => void;
 }
@@ -32,9 +33,10 @@ interface NotificationsState {
 export const useNotifications = create<NotificationsState>()((set, get) => ({
   items: [],
   toasts: [],
-  push: (n) => {
+  push: (n, { toast = true } = {}) => {
     if (get().items.some((x) => x.id === n.id)) return;
-    set({ items: [{ ...n, at: Date.now() }, ...get().items], toasts: [...get().toasts, n.id] });
+    set({ items: [{ ...n, at: Date.now() }, ...get().items], toasts: toast ? [...get().toasts, n.id] : get().toasts });
+    if (!toast) return;
     play("notify");
     setTimeout(() => get().dismissToast(n.id), 6000);
   },

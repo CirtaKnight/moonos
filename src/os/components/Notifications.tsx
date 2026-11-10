@@ -1,80 +1,176 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { BellOff, X } from "lucide-react";
+import { ArrowUpRight, BellOff, CalendarDays, Sparkles, Trophy, X } from "lucide-react";
+import { siGithub } from "simple-icons";
 import { useEffect } from "react";
 import { openApp, openProject } from "../apps/launch";
 import type { AppId } from "../apps/registry";
 import { useContent } from "../content/ContentProvider";
 import { useNow } from "../hooks";
-import { useNotifications, type Notice } from "../store/notifications";
+import { timeAgo } from "../lib/github";
+import { useNotifications, type Notice, type NoticeSource } from "../store/notifications";
 import { useSettings } from "../store/settings";
 import { useUI } from "../store/ui";
 import { LogoMark } from "./Logo";
 import { MENUBAR_H, TASKBAR_H } from "./Shell";
 
 const NEW_PROJECT_DAYS = 45;
+const ACTIVITY_DAYS = 30;
+const UPCOMING_DAYS = 14;
+const DAY = 86_400_000;
 
-/** Raises welcome + "new project" notifications once per visitor. */
+const noticeTime = (n: Notice) => Date.parse(n.time ?? new Date(n.at).toISOString());
+const byTime = (a: Notice, b: Notice) => noticeTime(b) - noticeTime(a);
+
+/**
+ * Startup notifications: welcome, new projects, admin announcements, live GitHub activity
+ * and upcoming agenda items. Everything lands in the notification center; only things the
+ * visitor hasn't seen before pop up as toasts (a few at most).
+ */
 export function useStartupNotifications() {
-  const { projects } = useContent();
+  const { projects, announcements, activity, events } = useContent();
   useEffect(() => {
     const settings = useSettings.getState();
+    const seen = new Set(settings.seenNotices);
     const { push } = useNotifications.getState();
     const timers: ReturnType<typeof setTimeout>[] = [];
+    let delay = 1800;
+    let toasts = 0;
+    const queue = (n: Omit<Notice, "at">, wantToast = true) => {
+      const toast = wantToast && !seen.has(n.id) && toasts < 4;
+      if (toast) toasts++;
+      const at = toast ? (delay += 1300) : 0;
+      timers.push(setTimeout(() => push(n, { toast }), at));
+    };
 
-    timers.push(
-      setTimeout(
-        () =>
-          push({
-            id: "welcome",
-            title: settings.seenProjects.length ? "Welcome back" : "Welcome to MoonOS",
-            body: "Open the Terminal and type `help`, or press Ctrl+K to search.",
-            action: { type: "app", app: "terminal" },
-          }),
-        1800,
-      ),
+    queue({
+      id: "welcome",
+      title: settings.seenNotices.length ? "Welcome back" : "Welcome to MoonOS",
+      body: "Open the Terminal and type `help`, press Ctrl+K to search, or ? for shortcuts.",
+      source: "system",
+      action: { type: "app", app: "terminal" },
+    });
+
+    const cutoff = Date.now() - NEW_PROJECT_DAYS * DAY;
+    projects
+      .filter((p) => !p.archived && !settings.seenProjects.includes(p.id) && p.publishedAt && new Date(p.publishedAt).getTime() > cutoff)
+      .slice(0, 3)
+      .forEach((p) =>
+        queue({
+          id: `project:${p.id}`,
+          title: `New project: ${p.title}`,
+          body: p.summary,
+          source: "star",
+          action: { type: "project", slug: p.slug, title: p.title },
+        }),
+      );
+
+    announcements.slice(0, 6).forEach((a) =>
+      queue({
+        id: `ann:${a.id}`,
+        title: a.title,
+        body: a.body,
+        time: a.publishedAt,
+        source: a.source,
+        action: a.url ? { type: "url", href: a.url } : undefined,
+      }),
     );
 
-    const cutoff = Date.now() - NEW_PROJECT_DAYS * 86_400_000;
-    const fresh = projects.filter(
-      (p) =>
-        !p.archived &&
-        !settings.seenProjects.includes(p.id) &&
-        p.publishedAt &&
-        new Date(p.publishedAt).getTime() > cutoff,
-    );
-    fresh.slice(0, 3).forEach((p, i) =>
-      timers.push(
-        setTimeout(
-          () =>
-            push({
-              id: `project:${p.id}`,
-              title: `New project: ${p.title}`,
-              body: p.summary,
-              action: { type: "project", slug: p.slug, title: p.title },
-            }),
-          3200 + i * 1400,
-        ),
-      ),
-    );
+    const now = Date.now();
+    events
+      .filter((e) => {
+        const t = new Date(e.start).getTime();
+        return t >= now - DAY && t <= now + UPCOMING_DAYS * DAY;
+      })
+      .forEach((e) =>
+        queue({
+          id: `event:${e.id}`,
+          title: `Coming up: ${e.title}`,
+          body: [new Date(e.start).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }), e.location]
+            .filter(Boolean)
+            .join(" · "),
+          source: "calendar",
+          action: { type: "app", app: "agenda" },
+        }),
+      );
+
+    const recent = now - ACTIVITY_DAYS * DAY;
+    activity
+      .filter((a) => new Date(a.at).getTime() > recent)
+      .slice(0, 10)
+      .forEach((a, i) =>
+        // Only the two most recent GitHub events may pop up; the rest wait in the center.
+        queue({ id: a.id, title: a.title, body: a.body, time: a.at, source: "github", action: { type: "url", href: a.url } }, i < 2),
+      );
+
     settings.markProjectsSeen(projects.map((p) => p.id));
+    settings.markNoticesSeen([
+      "welcome",
+      ...announcements.map((a) => `ann:${a.id}`),
+      ...events.map((e) => `event:${e.id}`),
+      ...activity.map((a) => a.id),
+    ]);
     return () => timers.forEach(clearTimeout);
-  }, [projects]);
+  }, [projects, announcements, activity, events]);
 }
 
 function runAction(n: Notice) {
-  if (n.action?.type === "project") openProject({ slug: n.action.slug, title: n.action.title });
-  else if (n.action?.type === "app") openApp(n.action.app as AppId);
+  const a = n.action;
+  if (!a) return;
+  if (a.type === "project") openProject({ slug: a.slug, title: a.title });
+  else if (a.type === "app") openApp(a.app as AppId, a.params);
+  else window.open(a.href, "_blank", "noopener,noreferrer");
+}
+
+function SourceIcon({ source }: { source?: NoticeSource }) {
+  const cls = "grid size-[22px] place-items-center rounded-md";
+  switch (source) {
+    case "github":
+      return (
+        <span className={`${cls} bg-white/10 text-fg`}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="GitHub">
+            <path d={siGithub.path} />
+          </svg>
+        </span>
+      );
+    case "linkedin":
+      return (
+        <span className={`${cls} bg-[#0a66c2] text-white`} aria-label="LinkedIn">
+          <span className="text-[11px] leading-none font-bold">in</span>
+        </span>
+      );
+    case "trophy":
+      return (
+        <span className={`${cls} bg-gold/20 text-gold`}>
+          <Trophy size={13} />
+        </span>
+      );
+    case "calendar":
+      return (
+        <span className={`${cls} bg-[#f0c987]/20 text-[#f0c987]`}>
+          <CalendarDays size={13} />
+        </span>
+      );
+    case "star":
+      return (
+        <span className={`${cls} bg-accent/20 text-accent`}>
+          <Sparkles size={13} />
+        </span>
+      );
+    default:
+      return <LogoMark size={22} />;
+  }
 }
 
 function NoticeCard({ n, onClose, compact }: { n: Notice; onClose?: () => void; compact?: boolean }) {
   const now = useNow(30_000);
-  const ago = now ? Math.max(0, Math.round((now.getTime() - n.at) / 60000)) : 0;
+  const when = timeAgo(n.time ?? new Date(n.at).toISOString(), now?.getTime());
+  const external = n.action?.type === "url";
   return (
     <div className="group relative flex gap-3 rounded-xl border border-line bg-surface-solid/95 p-3 shadow-window">
       <span className="mt-0.5 shrink-0">
-        <LogoMark size={22} />
+        <SourceIcon source={n.source} />
       </span>
       <button
         type="button"
@@ -86,9 +182,15 @@ function NoticeCard({ n, onClose, compact }: { n: Notice; onClose?: () => void; 
       >
         <span className="flex items-baseline gap-2">
           <span className="truncate text-[13px] font-semibold text-fg">{n.title}</span>
-          {!compact && <span className="ml-auto shrink-0 text-[10.5px] text-faint">{ago ? `${ago}m ago` : "now"}</span>}
+          {(!compact || n.time) && <span className="ml-auto shrink-0 text-[10.5px] text-faint">{when}</span>}
         </span>
         {n.body && <span className="mt-0.5 line-clamp-2 block text-xs text-muted">{n.body}</span>}
+        {external && (
+          <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-accent">
+            {n.source === "github" ? "View on GitHub" : n.source === "linkedin" ? "Open on LinkedIn" : "Open link"}
+            <ArrowUpRight size={11} />
+          </span>
+        )}
       </button>
       {onClose && (
         <button
@@ -171,7 +273,7 @@ export function NotificationLayer() {
                   <BellOff size={22} /> All quiet under the moon.
                 </div>
               ) : (
-                items.map((n) => (
+                [...items].sort(byTime).map((n) => (
                   <NoticeCard
                     key={n.id}
                     n={n}
