@@ -8,6 +8,7 @@ import { dockMenu } from "../menus";
 import { contextMenuProps } from "../store/contextMenu";
 import { useUI } from "../store/ui";
 import { useWindows, type WindowInstance } from "../store/windows";
+import type { Glyph } from "./AppGlyphs";
 import { AppIcon } from "./AppIcon";
 import { LogoMark } from "./Logo";
 import { Clock, MoonIndicator, TrayActions } from "./Tray";
@@ -48,23 +49,33 @@ function activateEntry(entry: ShellEntry) {
   }
 }
 
-function StartButton({ size = 22 }: { size?: number }) {
+/** The MoonOS mark as a tile glyph, so the launcher shares the app-icon recipe. */
+const LogoGlyph: Glyph = ({ size = 24 }) => <LogoMark variant="glyph" size={size} />;
+const LAUNCHER_GLOW = "#c8a96f";
+
+/**
+ * Start button. `tile` (taskbar): the same 40px button and 28px tile as the app entries, so
+ * it reads as "the first app, but special". `bare` (menu bar): just the solid mark.
+ */
+function StartButton({ variant }: { variant: "tile" | "bare" }) {
   const panel = useUI((s) => s.panel);
   const togglePanel = useUI((s) => s.togglePanel);
+  const open = panel === "start";
   return (
     <button
       type="button"
       aria-label="Start menu"
-      aria-expanded={panel === "start"}
+      aria-expanded={open}
+      title="Start"
       onClick={(e) => {
         e.stopPropagation();
         togglePanel("start");
       }}
-      className={`grid place-items-center rounded-lg px-1.5 transition-colors hover:bg-surface-hover ${
-        panel === "start" ? "bg-surface-hover" : ""
-      }`}
+      className={`grid shrink-0 place-items-center rounded-md transition-colors hover:bg-surface-hover ${
+        variant === "tile" ? "size-10" : "h-7 w-8"
+      } ${open ? "bg-surface-hover" : ""}`}
     >
-      <LogoMark size={size} />
+      {variant === "tile" ? <AppIcon icon={LogoGlyph} tint={LAUNCHER_GLOW} size={28} /> : <LogoMark variant="glyph" size={17} />}
     </button>
   );
 }
@@ -81,7 +92,7 @@ export function MenuBar() {
       className="glass absolute inset-x-0 top-0 z-[60] flex items-center gap-3 border-b border-line px-2 text-fg"
       style={{ height: MENUBAR_H }}
     >
-      <StartButton size={20} />
+      <StartButton variant="bare" />
       <span className="text-[13px] font-semibold tracking-tight">{focusedTitle ?? "MoonOS"}</span>
       <div className="ml-auto flex items-center gap-1">
         <TrayActions />
@@ -122,20 +133,39 @@ export function Dock() {
 
 function DockLauncher() {
   const togglePanel = useUI((s) => s.togglePanel);
+  const [label, setLabel] = useState(false);
   return (
-    <motion.button
-      type="button"
-      aria-label="Start menu"
-      whileHover={{ y: -6, scale: 1.12 }}
-      transition={{ type: "spring", stiffness: 500, damping: 26 }}
-      onClick={(e) => {
-        e.stopPropagation();
-        togglePanel("start");
-      }}
-      className="grid size-12 place-items-center rounded-[13px] border border-line bg-[#0b0f1a]"
-    >
-      <LogoMark size={32} />
-    </motion.button>
+    // Same column structure as DockItem (tile + indicator strip) so the launcher shares the
+    // dock's baseline instead of sitting a dot-strip lower.
+    <div className="relative flex flex-col items-center">
+      {label && <DockLabel text="Start" />}
+      <motion.button
+        type="button"
+        aria-label="Start menu"
+        onHoverStart={() => setLabel(true)}
+        onHoverEnd={() => setLabel(false)}
+        onFocus={() => setLabel(true)}
+        onBlur={() => setLabel(false)}
+        whileHover={{ y: -6, scale: 1.12 }}
+        whileTap={{ scale: 0.92 }}
+        transition={{ type: "spring", stiffness: 500, damping: 26 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          togglePanel("start");
+        }}
+      >
+        <AppIcon icon={LogoGlyph} tint={LAUNCHER_GLOW} size={48} />
+      </motion.button>
+      <span className="mt-1 h-1 w-1" aria-hidden />
+    </div>
+  );
+}
+
+function DockLabel({ text }: { text: string }) {
+  return (
+    <span className="glass pointer-events-none absolute -top-9 rounded-md border border-line px-2 py-0.5 text-xs whitespace-nowrap text-fg">
+      {text}
+    </span>
   );
 }
 
@@ -154,11 +184,7 @@ function DockItem({
   const [hover, setHover] = useState(false);
   return (
     <div className="relative flex flex-col items-center">
-      {hover && (
-        <span className="glass pointer-events-none absolute -top-9 rounded-md border border-line px-2 py-0.5 text-xs whitespace-nowrap text-fg">
-          {app.name}
-        </span>
-      )}
+      {hover && <DockLabel text={app.name} />}
       <motion.button
         type="button"
         aria-label={app.name}
@@ -166,6 +192,8 @@ function DockItem({
         onContextMenu={contextMenuProps(() => dockMenu(appId)).onContextMenu}
         onHoverStart={() => setHover(true)}
         onHoverEnd={() => setHover(false)}
+        onFocus={() => setHover(true)}
+        onBlur={() => setHover(false)}
         whileHover={{ y: -6, scale: 1.12 }}
         whileTap={{ scale: 0.92 }}
         transition={{ type: "spring", stiffness: 500, damping: 26 }}
@@ -195,8 +223,8 @@ export function Taskbar() {
       className="glass absolute inset-x-0 bottom-0 z-[60] flex items-center gap-1 border-t border-line px-2"
       style={{ height: TASKBAR_H }}
     >
-      <StartButton size={26} />
-      <span className="mx-1 h-6 w-px bg-line" />
+      <StartButton variant="tile" />
+      <span className="mx-1.5 h-6 w-px shrink-0 bg-line" />
       <nav aria-label="Taskbar" className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
         {entries.map((entry) => {
           const app = apps[entry.appId];
