@@ -194,7 +194,7 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
   };
 
   // One gesture model for the whole grid: tap opens, horizontal swipe changes page,
-  // long-press then release opens the menu, long-press then move drags the icon.
+  // long-press opens the menu, long-press then move drags the icon instead.
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       const g = gesture.current;
@@ -253,11 +253,10 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
         const dx = e.clientX - g.startX;
         if (dx < -50 || g.vx < -0.45) setPage(Math.min(current + 1, pages - 1));
         else if (dx > 50 || g.vx > 0.45) setPage(Math.max(current - 1, 0));
-      } else if (g.mode === "armed" && g.id) {
+      } else if (g.mode === "armed") {
+        // The menu opened while holding; releasing keeps it open.
         suppressClick.current = true;
         setArmed(null);
-        const entry = byId.get(g.id);
-        if (entry) useContextMenu.getState().open(e.clientX, e.clientY, homeMenu(entry));
       } else if (g.mode === "drag" && g.id) {
         suppressClick.current = true;
         const target = targetAt(e.clientX, e.clientY, current);
@@ -298,6 +297,9 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
         g.mode = "armed";
         navigator.vibrate?.(10);
         setArmed(id);
+        // Like iOS: the menu appears while holding; moving the finger turns it into a drag.
+        const entry = byId.get(id);
+        if (entry) useContextMenu.getState().open(g.startX, g.startY, homeMenu(entry));
       }, LONG_PRESS_MS);
     }
     gesture.current = g;
