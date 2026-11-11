@@ -5,6 +5,7 @@ import { isSanityConfigured } from "@/sanity/env";
 import { OS_CONTENT_QUERY } from "@/sanity/queries";
 import { githubUser } from "../lib/links";
 import { parseRepo } from "../lib/github";
+import { parsePlace } from "../lib/place";
 import { fallbackContent } from "./fallback";
 import { getGithubActivity, getRepoStats } from "./github";
 import type { OSContent, Profile, Project, SiteSettings } from "./types";
@@ -51,6 +52,7 @@ function toProject(raw: any): Project {
     color: raw.color ?? undefined,
     archived: Boolean(raw.archived),
     publishedAt: raw.publishedAt ?? undefined,
+    place: parsePlace(raw.place),
     repo: raw.repoUrl ? { url: raw.repoUrl, fullName: raw.repoUrl.replace(/^https?:\/\/(www\.)?github\.com\//, "") } : undefined,
     items: compact<any>(raw.items)
       .filter((i) => i.kind && i.title)
@@ -123,6 +125,20 @@ export async function getContent(): Promise<OSContent> {
         url: e.url ?? undefined,
         description: e.description ?? undefined,
         projectSlug: e.projectSlug ?? undefined,
+        place: parsePlace(e.place),
+      })),
+      experiences: compact<any>(raw?.experiences).map((x) => ({
+        id: x.id,
+        role: x.role ?? "Role",
+        organization: x.organization ?? "",
+        kind: x.kind ?? "job",
+        start: x.start,
+        end: x.end ?? undefined,
+        place: parsePlace(x.place),
+        description: x.description ?? undefined,
+        skills: compact<string>(x.skills),
+        url: x.url ?? undefined,
+        logoUrl: x.logoUrl ?? undefined,
       })),
     };
   } catch (err) {

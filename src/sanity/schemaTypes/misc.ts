@@ -176,6 +176,7 @@ export const agendaEvent = defineType({
     defineField({ name: "start", type: "date", validation: (r) => r.required() }),
     defineField({ name: "end", type: "date", description: "Optional, for multi-day items." }),
     defineField({ name: "location", type: "string" }),
+    defineField({ name: "place", title: "Map pin", type: "place", description: "Shows this item on the Map app." }),
     defineField({ name: "url", title: "Link", type: "url" }),
     defineField({ name: "description", type: "text", rows: 3 }),
     defineField({ name: "project", title: "Related project", type: "reference", to: [{ type: "project" }] }),

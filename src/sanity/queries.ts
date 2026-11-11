@@ -11,7 +11,7 @@ export const OS_CONTENT_QUERY = defineQuery(`{
   "projects": *[_type == "project" && defined(slug.current)] | order(order asc, date desc){
     "id": _id,
     "slug": slug.current,
-    title, summary, description, tags, date, color, "repoUrl": repo,
+    title, summary, description, tags, date, color, "repoUrl": repo, place,
     "archived": coalesce(archived, false),
     "publishedAt": _createdAt,
     "coverUrl": cover.asset->url,
@@ -40,7 +40,11 @@ export const OS_CONTENT_QUERY = defineQuery(`{
     | order(publishedAt desc)[0...20]{ "id": _id, title, body, url, linkLabel, "source": coalesce(source, "generic"), publishedAt },
   "events": *[_type == "event" && defined(start)] | order(start desc){
     "id": _id, title, "kind": coalesce(kind, "other"), start, end, location, url, description,
-    "projectSlug": project->slug.current
+    "projectSlug": project->slug.current, place
+  },
+  "experiences": *[_type == "experience"] | order(start desc){
+    "id": _id, role, organization, kind, start, end, place, description, skills, url,
+    "logoUrl": logo.asset->url
   },
   "settings": *[_id == "siteSettings"][0]{
     welcomeNote, bootLines, weatherCity,

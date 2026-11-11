@@ -90,6 +90,7 @@ export const project = defineType({
     defineField({ name: "description", type: "text", rows: 5 }),
     defineField({ name: "tags", type: "array", of: [{ type: "string" }], options: { layout: "tags" } }),
     defineField({ name: "date", type: "date", options: { dateFormat: "MMMM YYYY" } }),
+    defineField({ name: "place", title: "Map pin", type: "place", description: "Where this project happened (shown on the Map app)." }),
     defineField({
       name: "repo",
       title: "GitHub repository",

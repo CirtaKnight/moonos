@@ -28,6 +28,28 @@ export interface RepoStats {
   pushedAt?: string;
 }
 
+export interface Place {
+  name?: string;
+  lat: number;
+  lng: number;
+}
+
+export type ExperienceKind = "internship" | "job" | "freelance" | "club" | "volunteering" | "education";
+
+export interface Experience {
+  id: string;
+  role: string;
+  organization: string;
+  kind: ExperienceKind;
+  start: string;
+  end?: string;
+  place?: Place;
+  description?: string;
+  skills: string[];
+  url?: string;
+  logoUrl?: string;
+}
+
 export interface Project {
   id: string;
   slug: string;
@@ -44,6 +66,7 @@ export interface Project {
   items: ProjectItem[];
   /** GitHub repository, with live stats when available. */
   repo?: RepoStats;
+  place?: Place;
 }
 
 export interface MediaEntry {
@@ -143,6 +166,7 @@ export interface AgendaEvent {
   url?: string;
   description?: string;
   projectSlug?: string;
+  place?: Place;
 }
 
 export interface OSContent {
@@ -156,6 +180,7 @@ export interface OSContent {
   activity: ActivityItem[];
   announcements: Announcement[];
   events: AgendaEvent[];
+  experiences: Experience[];
   /** "cms" when served from Sanity, "fallback" when using built-in defaults. */
   source: "cms" | "fallback";
 }
