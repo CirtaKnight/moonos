@@ -1,5 +1,6 @@
 "use client";
 
+import { RecruiterButton } from "./RecruiterButton";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { apps, type AppId } from "../apps/registry";
@@ -95,6 +96,7 @@ export function MenuBar() {
       <StartButton variant="bare" />
       <span className="text-[13px] font-semibold tracking-tight">{focusedTitle ?? "MoonOS"}</span>
       <div className="ml-auto flex items-center gap-1">
+        <RecruiterButton size="sm" className="mr-2" />
         <TrayActions />
         <span className="mx-1 h-4 w-px bg-line" />
         <MoonIndicator />
@@ -262,6 +264,7 @@ export function Taskbar() {
         })}
       </nav>
       <div className="flex items-center gap-1">
+        <RecruiterButton className="mr-2" />
         <TrayActions />
         <span className="mx-1 h-5 w-px bg-line" />
         <MoonIndicator />
