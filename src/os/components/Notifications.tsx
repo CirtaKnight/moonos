@@ -47,9 +47,9 @@ export function useStartupNotifications() {
     queue({
       id: "welcome",
       title: settings.seenNotices.length ? "Welcome back" : "Welcome to MoonOS",
-      body: "Open the Terminal and type `help`, press Ctrl+K to search, or ? for shortcuts.",
+      body: "Double-click an icon to open it. Start with About me, or press Ctrl+K to search everything.",
       source: "system",
-      action: { type: "app", app: "terminal" },
+      action: { type: "app", app: "about" },
     });
 
     const cutoff = Date.now() - NEW_PROJECT_DAYS * DAY;

@@ -52,7 +52,7 @@ const DEFAULTS: SettingsData = {
   sound: false,
   reduceMotion: false,
   customCursor: true,
-  screensaverMinutes: 3,
+  screensaverMinutes: 10,
   hasBooted: false,
   seenProjects: [],
   seenNotices: [],
@@ -87,7 +87,8 @@ export const useSettings = create<SettingsState>()(
       version: 4,
       // v1 → v2 (MoonOS): new fields get defaults; everyone gets the new animated wallpaper once.
       // v2 → v3: the Day theme was removed, so the stored `theme` is dropped.
-      // v3 → v4: project folders moved to the top-right by default, so old icon layouts are reset.
+      // v3 → v4: project folders moved to the top-right by default, so old icon layouts are reset;
+      // the 3-minute screensaver (too eager for reading) becomes 10.
       migrate: (persisted, version) => {
         const { theme: _drop, ...old } = (persisted ?? {}) as Partial<SettingsData> & { theme?: string };
         void _drop;
@@ -95,7 +96,7 @@ export const useSettings = create<SettingsState>()(
           ...DEFAULTS,
           ...old,
           ...(version < 2 ? { wallpaper: "starfield" } : {}),
-          ...(version < 4 ? { iconLayout: {} } : {}),
+          ...(version < 4 ? { iconLayout: {}, ...(old.screensaverMinutes === 3 ? { screensaverMinutes: 10 } : {}) } : {}),
         };
       },
       partialize: (s): SettingsData => ({

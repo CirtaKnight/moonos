@@ -49,7 +49,7 @@ export function KonshuCorner({ bottom, right = 18, size = 52, compact = false }:
       : setTimeout(() => {
           setBubble(true);
           markGreeted();
-        }, 3000);
+        }, 7000); // after the welcome toast, so greeters don't pile up
     return () => {
       clearTimeout(t1);
       if (t2) clearTimeout(t2);
@@ -89,7 +89,7 @@ export function KonshuCorner({ bottom, right = 18, size = 52, compact = false }:
               <X size={13} />
             </button>
             <p className="text-[13px] leading-snug text-fg">
-              Hi, I&apos;m <span className="text-gold">Konshu</span>, keeper of this sky. Need a hand finding something in {first}&apos;s work?
+              Hi, I&apos;m <span className="font-medium text-accent">Konshu</span>, keeper of this sky. Need a hand finding something in {first}&apos;s work?
             </p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <button
@@ -141,7 +141,7 @@ export function KonshuCorner({ bottom, right = 18, size = 52, compact = false }:
               setBubble(false);
               ask();
             }}
-            className="pointer-events-auto relative rounded-full shadow-[0_10px_30px_-6px_rgb(0_0_0/0.7),0_0_24px_-4px_rgb(200_169_111/0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            className="pointer-events-auto relative rounded-full shadow-[0_10px_28px_-6px_rgb(0_0_0/0.75)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {/* The idle float lives on an inner element so the button itself stays put. */}
             <motion.span
@@ -154,7 +154,7 @@ export function KonshuCorner({ bottom, right = 18, size = 52, compact = false }:
             {!reduceMotion && (
               <motion.span
                 aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-gold/60"
+                className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-accent/50"
                 initial={{ opacity: 0.9, scale: 1 }}
                 animate={{ opacity: 0, scale: 1.6 }}
                 transition={{ duration: 1.6, delay: 0.3, repeat: 2, repeatDelay: 2.5 }}
