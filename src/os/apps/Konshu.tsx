@@ -32,7 +32,7 @@ function runAction(a: KonshuAction) {
 export function KonshuAvatar({ size = 32 }: { size?: number }) {
   return (
     <span
-      className="grid shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#1d2640,#06080f)] ring-1 ring-gold/50"
+      className="grid shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#1d2640,#06080f)] ring-1 ring-accent/40"
       style={{ width: size, height: size }}
       aria-hidden
     >

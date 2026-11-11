@@ -53,7 +53,7 @@ function activateEntry(entry: ShellEntry) {
 
 /** The MoonOS mark as a tile glyph, so the launcher shares the app-icon recipe. */
 const LogoGlyph: Glyph = ({ size = 24 }) => <LogoMark variant="glyph" size={size} />;
-const LAUNCHER_GLOW = "#c8a96f";
+const LAUNCHER_GLOW = "#8ea7dc";
 
 /**
  * Start button. `tile` (taskbar): the same 40px button and 28px tile as the app entries, so

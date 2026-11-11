@@ -12,7 +12,7 @@ export function RecruiterButton({ size = "md", className = "" }: { size?: "sm" |
       href={RECRUITER_PATH}
       data-recruiter-button
       onClick={(e) => e.stopPropagation()}
-      className={`group inline-flex shrink-0 items-center rounded-full bg-gold font-semibold text-[#1a1406] shadow-[0_0_20px_-4px_rgb(200_169_111/0.75)] transition-colors hover:bg-[#dcc08a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+      className={`group inline-flex shrink-0 items-center rounded-full bg-gold font-semibold text-[#1a1406] shadow-[0_6px_16px_-6px_rgb(200_169_111/0.6)] transition-colors hover:bg-[#dcc08a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
         sm ? "h-7 gap-1.5 px-2.5 text-xs" : "h-8 gap-2 px-3.5 text-[13px]"
       } ${className}`}
     >
