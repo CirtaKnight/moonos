@@ -6,7 +6,9 @@ import type { OSContent } from "@/os/content/types";
  * Konshu's remote brain: Google Gemini (free tier), used only when the local brain in
  * src/os/lib/konshu.ts doesn't recognise a question. Answers strictly from site content.
  *
- * Env: GEMINI_API_KEY (required), GEMINI_MODEL (optional, defaults below).
+ * Env: KONSHU_GEMINI_API_KEY (required; a free key from Google AI Studio), KONSHU_GEMINI_MODEL
+ * (optional). Deliberately not GEMINI_API_KEY: some hosts (e.g. Netlify's AI Gateway) inject
+ * their own key under that name, which only works through their proxy and their billing.
  */
 const DEFAULT_MODEL = "gemini-2.5-flash";
 /** Rolling alias, tried if the pinned model name is ever retired. */
@@ -88,7 +90,7 @@ async function callGemini(model: string, key: string, system: string, history: M
 }
 
 export async function POST(req: NextRequest) {
-  const key = process.env.GEMINI_API_KEY;
+  const key = process.env.KONSHU_GEMINI_API_KEY;
   if (!key) return NextResponse.json({ error: "Konshu's remote brain isn't configured yet." }, { status: 503 });
 
   let body: { messages?: Msg[] };
@@ -116,7 +118,7 @@ export async function POST(req: NextRequest) {
 
   const content = await getOSContent();
   const system = systemPrompt(content);
-  const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
+  const model = process.env.KONSHU_GEMINI_MODEL || DEFAULT_MODEL;
   try {
     let res = await callGemini(model, key, system, history);
     if (res.status === 404 && model !== FALLBACK_MODEL) res = await callGemini(FALLBACK_MODEL, key, system, history);
