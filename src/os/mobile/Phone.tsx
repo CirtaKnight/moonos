@@ -4,7 +4,7 @@ import { KonshuCorner } from "../components/KonshuCorner";
 import { RecruiterButton } from "../components/RecruiterButton";
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import { BatteryFull, ChevronLeft, FolderOpen, Info, Link2, Search, Wifi } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp, openProject } from "../apps/launch";
 import { AppIcon, DocIcon, FolderIcon } from "../components/AppIcon";
@@ -15,10 +15,12 @@ import { NotificationLayer, useStartupNotifications } from "../components/Notifi
 import { Spotlight } from "../components/Spotlight";
 import { Wallpaper } from "../components/Wallpaper";
 import { useContent, useProjects } from "../content/ContentProvider";
-import { useNow, useViewport } from "../hooks";
+import { HOST_BADGE, useHostBadge, useNow, useViewport } from "../hooks";
 import { copyText, shareUrl } from "../lib/links";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
-import { contextMenuProps, useContextMenu, type MenuEntry } from "../store/contextMenu";
+import { moveHome, pageCount, placeHome, slotOf, slotPosition } from "../lib/homeGrid";
+import { useContextMenu, type MenuEntry } from "../store/contextMenu";
+import { useSettings } from "../store/settings";
 import { usePhone, type Screen } from "../store/phone";
 import { useUI } from "../store/ui";
 import { useDeepLinks } from "../useDeepLinks";
@@ -92,12 +94,41 @@ function StatusBar() {
   );
 }
 
+const COLS = 4;
+const GRID_TOP = 12;
+const LONG_PRESS_MS = 450;
+const EDGE_PX = 28;
+const EDGE_HOLD_MS = 550;
+
+type Gesture = {
+  id?: string;
+  mode: "pending" | "swipe" | "armed" | "drag" | "ignore";
+  startX: number;
+  startY: number;
+  lastX: number;
+  lastT: number;
+  vx: number;
+  timer?: ReturnType<typeof setTimeout>;
+};
+
 function HomeScreen({ dimmed }: { dimmed: boolean }) {
   const { profile } = useContent();
   const projects = useProjects();
   const viewport = useViewport();
   const togglePanel = useUI((s) => s.togglePanel);
+  const saved = useSettings((s) => s.homeLayout);
+  const setHomeLayout = useSettings((s) => s.setHomeLayout);
+  const badge = useHostBadge();
   const [page, setPage] = useState(0);
+  const [area, setArea] = useState<{ w: number; h: number } | null>(null);
+  const [swipeX, setSwipeX] = useState(0);
+  const [armed, setArmed] = useState<string | null>(null);
+  const [drag, setDrag] = useState<{ id: string; x: number; y: number; target: number | null } | null>(null);
+  const [extraPage, setExtraPage] = useState(false);
+  const areaRef = useRef<HTMLDivElement>(null);
+  const gesture = useRef<Gesture | null>(null);
+  const suppressClick = useRef(false);
+  const edge = useRef<{ side: -1 | 1; timer: ReturnType<typeof setTimeout> } | null>(null);
 
   const entries: HomeEntry[] = useMemo(
     () => [
@@ -122,19 +153,167 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
     ],
     [projects],
   );
+  const byId = useMemo(() => new Map(entries.map((e) => [e.id, e])), [entries]);
 
-  // Fit as many rows as the screen allows; extra icons spill onto more pages (no scrolling).
+  // Measure the real free space between the search pill and the dock, so the last row is
+  // never tucked under the dock (mobile browser bars make window heights unreliable).
+  useLayoutEffect(() => {
+    const el = areaRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setArea({ w: e.contentRect.width, h: e.contentRect.height }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const rows = Math.max(1, Math.floor(((area?.h ?? 0) - GRID_TOP) / ROW_H));
+  const perPage = rows * COLS;
+  const ids = useMemo(() => entries.map((e) => e.id), [entries]);
+  const layout = useMemo(
+    () => placeHome(ids, saved, perPage, COLS, ids.filter((id) => id.startsWith("project:"))),
+    [ids, saved, perPage],
+  );
+  const pages = pageCount(layout, perPage) + (extraPage ? 1 : 0);
+  const current = Math.min(page, pages - 1);
+  const colW = (area?.w ?? 0) / COLS;
+
   const h = viewport?.h ?? 800;
   const widgetH = h > 700 ? 168 : 112;
-  const rows = Math.max(2, Math.floor((h - STATUS_H - widgetH - DOCK_H - 40) / ROW_H));
-  const perPage = rows * 4;
-  const pages = Math.max(1, Math.ceil(entries.length / perPage));
-  const current = Math.min(page, pages - 1);
+  const dockPad = badge ? HOST_BADGE.h - 6 : 0;
 
-  const onDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x < -50 || info.velocity.x < -400) setPage(Math.min(current + 1, pages - 1));
-    else if (info.offset.x > 50 || info.velocity.x > 400) setPage(Math.max(current - 1, 0));
+  const clearEdge = () => {
+    if (edge.current) clearTimeout(edge.current.timer);
+    edge.current = null;
   };
+
+  const targetAt = (x: number, y: number, onPage: number) => {
+    const rect = areaRef.current?.getBoundingClientRect();
+    if (!rect || !colW) return null;
+    const col = Math.max(0, Math.min(COLS - 1, Math.floor((x - rect.left) / colW)));
+    const row = Math.max(0, Math.min(rows - 1, Math.floor((y - rect.top - GRID_TOP) / ROW_H)));
+    return slotOf(onPage, row, col, perPage, COLS);
+  };
+
+  // One gesture model for the whole grid: tap opens, horizontal swipe changes page,
+  // long-press then release opens the menu, long-press then move drags the icon.
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const g = gesture.current;
+      if (!g) return;
+      const dx = e.clientX - g.startX;
+      const dy = e.clientY - g.startY;
+      const now = performance.now();
+      g.vx = (e.clientX - g.lastX) / Math.max(1, now - g.lastT);
+      g.lastX = e.clientX;
+      g.lastT = now;
+      if (g.mode === "pending") {
+        if (Math.hypot(dx, dy) < 10) return;
+        clearTimeout(g.timer);
+        g.mode = Math.abs(dx) > Math.abs(dy) ? "swipe" : "ignore";
+      }
+      if (g.mode === "swipe") {
+        const atEdge = (dx > 0 && current === 0) || (dx < 0 && current === pages - 1);
+        setSwipeX(atEdge ? dx * 0.3 : dx);
+        return;
+      }
+      if (g.mode === "armed" && g.id && Math.hypot(dx, dy) > 8) {
+        g.mode = "drag";
+        setArmed(null);
+        useContextMenu.getState().close();
+      }
+      if (g.mode === "drag" && g.id) {
+        setDrag({ id: g.id, x: e.clientX, y: e.clientY, target: targetAt(e.clientX, e.clientY, current) });
+        // Hold at a screen edge to carry the icon to the neighbouring page.
+        const rect = areaRef.current?.getBoundingClientRect();
+        const side = !rect ? 0 : e.clientX < rect.left + EDGE_PX ? -1 : e.clientX > rect.right - EDGE_PX ? 1 : 0;
+        if (!side) clearEdge();
+        else if (!edge.current || edge.current.side !== side) {
+          clearEdge();
+          edge.current = {
+            side: side as -1 | 1,
+            timer: setTimeout(() => {
+              edge.current = null;
+              if (side < 0 && current > 0) setPage(current - 1);
+              if (side > 0) {
+                if (current === pages - 1) setExtraPage(true);
+                setPage(current + 1);
+              }
+            }, EDGE_HOLD_MS),
+          };
+        }
+      }
+    };
+    const onUp = (e: PointerEvent) => {
+      const g = gesture.current;
+      if (!g) return;
+      clearTimeout(g.timer);
+      clearEdge();
+      gesture.current = null;
+      if (g.mode === "swipe") {
+        suppressClick.current = true;
+        const dx = e.clientX - g.startX;
+        if (dx < -50 || g.vx < -0.45) setPage(Math.min(current + 1, pages - 1));
+        else if (dx > 50 || g.vx > 0.45) setPage(Math.max(current - 1, 0));
+      } else if (g.mode === "armed" && g.id) {
+        suppressClick.current = true;
+        setArmed(null);
+        const entry = byId.get(g.id);
+        if (entry) useContextMenu.getState().open(e.clientX, e.clientY, homeMenu(entry));
+      } else if (g.mode === "drag" && g.id) {
+        suppressClick.current = true;
+        const target = targetAt(e.clientX, e.clientY, current);
+        if (target !== null) setHomeLayout(moveHome(layout, g.id, target));
+        setDrag(null);
+        setExtraPage(false);
+      }
+      setSwipeX(0);
+    };
+    const onCancel = () => {
+      const g = gesture.current;
+      if (g) clearTimeout(g.timer);
+      clearEdge();
+      gesture.current = null;
+      setSwipeX(0);
+      setArmed(null);
+      setDrag(null);
+      setExtraPage(false);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onCancel);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+    };
+  });
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    suppressClick.current = false;
+    const id = (e.target as HTMLElement).closest<HTMLElement>("[data-home-id]")?.dataset.homeId;
+    const g: Gesture = { id, mode: "pending", startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastT: performance.now(), vx: 0 };
+    if (id) {
+      g.timer = setTimeout(() => {
+        if (gesture.current !== g || g.mode !== "pending") return;
+        g.mode = "armed";
+        navigator.vibrate?.(10);
+        setArmed(id);
+      }, LONG_PRESS_MS);
+    }
+    gesture.current = g;
+  };
+
+  const onIconClick = (entry: HomeEntry) => {
+    if (suppressClick.current) {
+      suppressClick.current = false;
+      return;
+    }
+    if (!useContextMenu.getState().menu) entry.open();
+  };
+
+  const editing = !!drag;
+  const dragEntry = drag ? byId.get(drag.id) : undefined;
+  const ghost = drag && drag.target !== null ? slotPosition(drag.target, perPage, COLS) : null;
 
   return (
     <motion.div
@@ -171,30 +350,57 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
         <RecruiterButton size="sm" className="h-8" />
       </div>
 
-      {/* Icon pages */}
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        <motion.div
+      {/* Icon pages: swipe sideways, long-press for the menu, long-press and move to rearrange. */}
+      <div ref={areaRef} data-home-grid onPointerDown={onPointerDown} className="relative min-h-0 flex-1 touch-none overflow-hidden select-none">
+        <div
           className="flex h-full"
-          drag={pages > 1 ? "x" : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.25}
-          onDragEnd={onDragEnd}
-          animate={{ x: `${-current * 100}%` }}
-          transition={{ type: "spring", stiffness: 320, damping: 34 }}
+          style={{
+            transform: `translateX(calc(${-current * 100}% + ${swipeX}px))`,
+            transition: swipeX ? "none" : "transform 380ms cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
         >
-          {Array.from({ length: pages }, (_, p) => (
-            <ul key={p} className="grid w-full shrink-0 grid-cols-4 content-start gap-y-2 px-3 pt-3" style={{ gridAutoRows: ROW_H - 8 }}>
-              {entries.slice(p * perPage, (p + 1) * perPage).map((e) => (
-                <li key={e.id}>
-                  <HomeIcon label={e.label} onOpen={e.open} menu={() => homeMenu(e)}>
-                    {e.icon}
-                  </HomeIcon>
-                </li>
-              ))}
-            </ul>
-          ))}
-        </motion.div>
+          {area &&
+            Array.from({ length: pages }, (_, p) => (
+              <ul key={p} aria-label={`Home page ${p + 1}`} className="relative h-full w-full shrink-0">
+                {ghost && ghost.page === p && (
+                  <li
+                    aria-hidden
+                    className="absolute rounded-2xl border border-dashed border-white/35 bg-white/6"
+                    style={{ left: ghost.col * colW + 6, top: GRID_TOP + ghost.row * ROW_H, width: colW - 12, height: ROW_H - 12 }}
+                  />
+                )}
+                {entries.map((e) => {
+                  const pos = slotPosition(layout[e.id], perPage, COLS);
+                  if (pos.page !== p) return null;
+                  const lifted = drag?.id === e.id;
+                  return (
+                    <li
+                      key={e.id}
+                      className="absolute transition-[left,top] duration-300 ease-out"
+                      style={{ left: pos.col * colW, top: GRID_TOP + pos.row * ROW_H, width: colW, height: ROW_H - 8, opacity: lifted ? 0.25 : 1 }}
+                    >
+                      <HomeIcon id={e.id} label={e.label} onOpen={() => onIconClick(e)} menu={() => homeMenu(e)} armed={armed === e.id} jiggle={editing && !lifted}>
+                        {e.icon}
+                      </HomeIcon>
+                    </li>
+                  );
+                })}
+              </ul>
+            ))}
+        </div>
       </div>
+
+      {/* The icon being dragged follows the finger. */}
+      {drag && dragEntry && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed z-[70] flex w-20 -translate-x-1/2 -translate-y-1/2 scale-110 flex-col items-center gap-1.5"
+          style={{ left: drag.x, top: drag.y }}
+        >
+          <span className="drop-shadow-[0_12px_20px_rgb(0_0_0/0.6)]">{dragEntry.icon}</span>
+          <span className="line-clamp-1 text-[11.5px] text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.8)]">{dragEntry.label}</span>
+        </div>
+      )}
 
       {/* Page dots */}
       <div className="flex h-5 shrink-0 items-center justify-center gap-1.5">
@@ -204,25 +410,23 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
               key={i}
               type="button"
               aria-label={`Page ${i + 1}`}
+              aria-current={i === current ? "page" : undefined}
               onClick={() => setPage(i)}
               className={`size-1.5 rounded-full transition-colors ${i === current ? "bg-white" : "bg-white/35"}`}
             />
           ))}
       </div>
 
-      {!dimmed && <KonshuCorner bottom={DOCK_H + 6} right={14} size={46} compact />}
+      {!dimmed && <KonshuCorner bottom={DOCK_H + dockPad + 6} right={14} size={46} compact />}
 
-      {/* Dock */}
-      <div className="shrink-0 px-3 pb-[max(10px,env(safe-area-inset-bottom))]" style={{ height: DOCK_H }}>
+      {/* Dock (lifted above the host badge when there is one) */}
+      <div
+        className="shrink-0 px-3"
+        style={{ height: DOCK_H + dockPad, paddingBottom: dockPad ? dockPad + 10 : "max(10px, env(safe-area-inset-bottom))" }}
+      >
         <div className="glass mx-auto flex h-[78px] max-w-md items-center justify-around rounded-[28px] border border-line px-2">
           {DOCK.map((id) => (
-            <motion.button
-              key={id}
-              type="button"
-              aria-label={apps[id].name}
-              whileTap={{ scale: 0.88 }}
-              onClick={() => openApp(id)}
-            >
+            <motion.button key={id} type="button" aria-label={apps[id].name} whileTap={{ scale: 0.88 }} onClick={() => openApp(id)}>
               <AppIcon icon={apps[id].icon} tint={apps[id].tint} size={56} />
             </motion.button>
           ))}
@@ -232,27 +436,45 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
   );
 }
 
-function HomeIcon({ label, onOpen, menu, children }: { label: string; onOpen: () => void; menu: () => MenuEntry[]; children: ReactNode }) {
-  const longPress = contextMenuProps(menu);
+function HomeIcon({
+  id,
+  label,
+  onOpen,
+  menu,
+  armed,
+  jiggle,
+  children,
+}: {
+  id: string;
+  label: string;
+  onOpen: () => void;
+  menu: () => MenuEntry[];
+  armed: boolean;
+  jiggle: boolean;
+  children: ReactNode;
+}) {
   return (
-    <motion.button
+    <button
       type="button"
-      whileTap={{ scale: 0.88 }}
-      onClick={() => {
-        if (!useContextMenu.getState().menu) onOpen();
+      data-home-id={id}
+      aria-label={label}
+      onClick={onOpen}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        // Touch long-presses are handled by the grid's gesture; this is the mouse right-click.
+        const native = e.nativeEvent as PointerEvent;
+        if (native.pointerType === "touch") return;
+        useContextMenu.getState().open(e.clientX, e.clientY, menu());
       }}
-      onContextMenu={longPress.onContextMenu}
-      onPointerDown={longPress.onPointerDown}
-      onPointerMove={longPress.onPointerMove}
-      onPointerUp={longPress.onPointerUp}
-      onPointerCancel={longPress.onPointerCancel}
-      className="flex w-full flex-col items-center gap-1.5"
+      className={`flex h-full w-full flex-col items-center gap-1.5 transition-transform duration-200 [-webkit-touch-callout:none] active:scale-[0.9] ${
+        armed ? "scale-110" : ""
+      } ${jiggle ? "home-jiggle" : ""}`}
     >
-      <span className="drop-shadow-[0_6px_12px_rgb(0_0_0/0.4)]">{children}</span>
-      <span className="line-clamp-1 max-w-full px-0.5 text-[11.5px] text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.8)]">
+      <span className="pointer-events-none drop-shadow-[0_6px_12px_rgb(0_0_0/0.4)]">{children}</span>
+      <span className="pointer-events-none line-clamp-1 max-w-full px-0.5 text-[11.5px] text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.8)]">
         {label}
       </span>
-    </motion.button>
+    </button>
   );
 }
 

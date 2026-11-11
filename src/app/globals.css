@@ -215,3 +215,15 @@ textarea {
   color: #3a4152;
   user-select: none;
 }
+
+/* Phone home: icons wobble while one is being rearranged. */
+@keyframes home-jiggle {
+  0%, 100% { transform: rotate(-1.4deg); }
+  50% { transform: rotate(1.4deg); }
+}
+.home-jiggle {
+  animation: home-jiggle 0.32s ease-in-out infinite;
+}
+li:nth-child(even) > .home-jiggle {
+  animation-delay: -0.16s;
+}
