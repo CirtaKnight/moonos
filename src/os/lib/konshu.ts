@@ -44,7 +44,7 @@ const APP_GUIDES: Record<string, { words: string[]; app: string; text: string }>
   orbit: { words: ["orbit game", "orbit"], app: "orbit", text: "Orbit is a one-tap game: hop between rings around the moon and dodge the debris." },
   memory: { words: ["memory", "phase memory"], app: "memory", text: "Phase memory: flip cards and match the moon phases in as few moves as possible." },
   terminal: { words: ["terminal", "command line", "shell"], app: "terminal", text: "The Terminal understands real commands: try `help`, `ls`, `whoami` or `neofetch`." },
-  map: { words: ["map", "where have", "locations", "places"], app: "map", text: "The Map shows where projects, hackathons and experiences happened." },
+  map: { words: ["map", "locations", "places", "on a map"], app: "map", text: "The Map shows where projects, hackathons and experiences happened." },
   trophies: { words: ["trophies", "trophy", "achievement", "secret", "easter egg"], app: "trophies", text: "There are achievements to unlock all over MoonOS, some of them secret. Trophies tracks them. (A hint: the Map hides one if you zoom out far enough.)" },
   settings: { words: ["settings", "wallpaper", "cursor", "screensaver"], app: "settings", text: "Settings lets you change the wallpaper, layout (dock or taskbar), sounds, cursor and screensaver." },
   agenda: { words: ["agenda", "calendar", "upcoming", "hackathon", "events"], app: "agenda", text: "" },
