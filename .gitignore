@@ -47,3 +47,6 @@ next-env.d.ts
 
 # Netlify local state
 .netlify
+
+# Local design-review archive
+.impeccable/

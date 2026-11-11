@@ -104,7 +104,7 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
       ...projects.map((p) => ({
         id: `project:${p.slug}`,
         label: p.title,
-        icon: <FolderIcon color={p.color} size={58} />,
+        icon: <FolderIcon color={p.color} size={56} />,
         open: () => openProject(p),
         info: { project: p.slug },
         link: `project/${p.slug}`,

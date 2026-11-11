@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ChevronRight, Keyboard, Lock, Power, RotateCcw, Search, Settings2 } from "lucide-react";
+import { ChevronRight, Keyboard, Lock, Power, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp, openProject } from "../apps/launch";
@@ -80,7 +80,7 @@ export function StartMenu() {
         </button>
 
         <h3 className="mt-5 mb-2 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">Apps</h3>
-        <ul className="grid grid-cols-4 gap-1 sm:grid-cols-5">
+        <ul className="grid grid-cols-4 gap-1 sm:grid-cols-6">
           {listed.map((id) => (
             <li key={id}>
               <button
@@ -121,13 +121,6 @@ export function StartMenu() {
 
       {/* Footer */}
       <div className="relative flex items-center justify-between border-t border-line bg-surface-2 px-3 py-2">
-        <button
-          type="button"
-          onClick={() => launch(() => openApp("settings"))}
-          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-fg"
-        >
-          <Settings2 size={16} /> Settings
-        </button>
         <button
           type="button"
           onClick={() => togglePanel("shortcuts")}

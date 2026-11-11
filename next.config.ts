@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The dev "N" badge sits on top of the OS chrome in every corner; errors still surface without it.
+  devIndicators: false,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
