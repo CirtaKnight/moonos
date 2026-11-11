@@ -20,6 +20,7 @@ import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
 import { useWindows } from "./store/windows";
 import { useDeepLinks } from "./useDeepLinks";
+import { useWindowMemory } from "./useWindowMemory";
 import { useSkyAchievements } from "./useSkyAchievements";
 
 export function Desktop() {
@@ -35,6 +36,8 @@ export function Desktop() {
   const togglePanel = useUI((s) => s.togglePanel);
   const snapPreview = useUI((s) => s.snapPreview);
   useStartupNotifications();
+  // Restored windows always sit underneath anything a deep link opens.
+  useWindowMemory();
   useDeepLinks();
   useIdleScreensaver();
   useSkyAchievements();
