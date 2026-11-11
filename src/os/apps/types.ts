@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import type { Glyph } from "../components/AppGlyphs";
 import type { ComponentType } from "react";
 import type { WindowParams } from "../store/windows";
 
@@ -13,7 +13,7 @@ export interface AppProps {
 export interface AppDefinition {
   id: string;
   name: string;
-  icon: LucideIcon;
+  icon: Glyph;
   tint: string;
   component: ComponentType<AppProps>;
   size: { w: number; h: number };
