@@ -8,7 +8,6 @@ import { KeyboardLayer } from "./components/Keyboard";
 import { useIdleScreensaver } from "./components/LockScreen";
 import { DesktopIcons } from "./components/DesktopIcons";
 import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
-import { SkyWidget } from "./components/SkyWidget";
 import { Spotlight } from "./components/Spotlight";
 import { DOCK_RESERVED, Dock, MENUBAR_H, MenuBar, TASKBAR_H, Taskbar } from "./components/Shell";
 import { StartMenu } from "./components/StartMenu";
@@ -82,7 +81,6 @@ export function Desktop() {
     >
       <Wallpaper />
       <DesktopIcons />
-      <SkyWidget />
 
       <AnimatePresence>
         {snapPreview && (

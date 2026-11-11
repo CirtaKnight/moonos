@@ -28,7 +28,8 @@ export const usePower = create<PowerStore>()((set, get) => ({
   lockPhase: "lock",
   bootDone: () => {
     set({ state: "on", fullBoot: false });
-    unlock("moonrise");
+    // Recorded quietly: a toast on every first visit felt like noise.
+    unlock("moonrise", { silent: true });
     if (wasOff) {
       wasOff = false;
       unlock("power-cycle");

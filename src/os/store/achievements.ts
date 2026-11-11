@@ -15,7 +15,8 @@ interface AchievementsState {
   unlocked: Record<string, number>;
   appsOpened: string[];
   commandsRun: number;
-  unlock: (id: string) => void;
+  /** `silent` records the trophy without a toast. */
+  unlock: (id: string, opts?: { silent?: boolean }) => void;
   trackApp: (appId: string) => void;
   trackCommand: () => void;
 }
@@ -26,11 +27,12 @@ export const useAchievements = create<AchievementsState>()(
       unlocked: {},
       appsOpened: [],
       commandsRun: 0,
-      unlock: (id) => {
+      unlock: (id, { silent = false } = {}) => {
         if (get().unlocked[id]) return;
         const a = achievementById(id);
         if (!a) return;
         set({ unlocked: { ...get().unlocked, [id]: Date.now() } });
+        if (silent) return;
         useNotifications.getState().push({
           id: `ach:${id}`,
           title: `🏆 ${a.title}`,
@@ -56,4 +58,4 @@ export const useAchievements = create<AchievementsState>()(
   ),
 );
 
-export const unlock = (id: string) => useAchievements.getState().unlock(id);
+export const unlock = (id: string, opts?: { silent?: boolean }) => useAchievements.getState().unlock(id, opts);
