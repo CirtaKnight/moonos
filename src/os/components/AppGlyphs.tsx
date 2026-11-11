@@ -167,6 +167,15 @@ export const MapGlyph = glyph(
   </>,
 );
 
+/** Konshu: a speech bubble holding the crescent. */
+export const KonshuGlyph = glyph(
+  "konshu",
+  <>
+    <path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7.5L7 21v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z" />
+    <path d="M13.6 7.6a3.6 3.6 0 1 0 0 6.3 2.9 2.9 0 1 1 0-6.3Z" fill={GOLD} stroke="none" />
+  </>,
+);
+
 /* --------------------------------------- System --------------------------------------- */
 
 /** Terminal: a prompt chevron and a gold caret. */

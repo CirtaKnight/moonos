@@ -10,6 +10,7 @@ import {
   InfoGlyph,
   MapGlyph,
   KeystrokeGlyph,
+  KonshuGlyph,
   MailGlyph,
   MemoryGlyph,
   MoonwordGlyph,
@@ -29,6 +30,7 @@ import { Browser } from "./Browser";
 import { CV } from "./CV";
 import { Folder as FolderApp } from "./Folder";
 import { Info } from "./Info";
+import { Konshu } from "./Konshu";
 import { MapApp } from "./MapApp";
 import { Gallery, Videos } from "./Media";
 import { Trophies } from "./Trophies";
@@ -73,6 +75,7 @@ export const APP_IDS = [
   "memory",
   "orbit",
   "map",
+  "konshu",
 ] as const;
 export type AppId = (typeof APP_IDS)[number];
 
@@ -106,6 +109,7 @@ export const apps: Record<AppId, AppDefinition> = {
   memory: { id: "memory", name: "Phase memory", icon: MemoryGlyph, tint: PLAY, component: Memory, size: { w: 480, h: 600 }, listed: false, pinned: false, description: "Memory match" },
   orbit: { id: "orbit", name: "Orbit", icon: OrbitGlyph, tint: PLAY, component: Orbit, size: { w: 520, h: 600 }, listed: false, pinned: false, description: "One-tap arcade" },
   map: { id: "map", name: "Map", icon: MapGlyph, tint: WORK, component: MapApp, size: { w: 980, h: 620 }, listed: true, pinned: true, description: "Where I've built, studied and hacked" },
+  konshu: { id: "konshu", name: "Konshu", icon: KonshuGlyph, tint: PLAY, component: Konshu, size: { w: 460, h: 600 }, listed: true, pinned: true, description: "Ask the guide anything" },
 };
 
 export function getApp(id: string): AppDefinition {

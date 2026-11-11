@@ -12,7 +12,7 @@ export type Effect =
   | { type: "clear" }
   | { type: "exit" }
   | { type: "restart" }
-  | { type: "openApp"; app: string }
+  | { type: "openApp"; app: string; params?: Record<string, string> }
   | { type: "openProject"; slug: string; title: string }
   | { type: "openItem"; slug: string; item: ProjectItem }
   | { type: "achievement"; id: string };
@@ -107,7 +107,7 @@ export const promptPath = (cwd: string[]) => (cwd.length ? `~/${cwd.join("/")}` 
 
 /* ---------------------------------- Commands ---------------------------------- */
 
-const APPS = ["about", "projects", "browser", "gallery", "videos", "terminal", "mail", "music", "game", "settings", "bin", "cv", "games", "agenda", "trophies", "moonword", "keystroke", "memory", "orbit", "map"];
+const APPS = ["about", "projects", "browser", "gallery", "videos", "terminal", "mail", "music", "game", "settings", "bin", "cv", "games", "agenda", "trophies", "moonword", "keystroke", "memory", "orbit", "map", "konshu"];
 const APP_ALIASES: Record<string, string> = {
   resume: "cv",
   "résumé": "cv",
@@ -141,6 +141,7 @@ export const COMMANDS: Record<string, string> = {
   history: "command history",
   clear: "clear the screen",
   agenda: "past & upcoming events",
+  konshu: "ask the guide (konshu <question>)",
   trophies: "your achievements",
   reboot: "restart the OS",
   exit: "close the terminal",
@@ -353,6 +354,13 @@ export function runCommand(
       if (past.length) say("Recently:", "accent");
       for (const e of past.slice(0, 4)) say(`  ${e.start.slice(0, 10)}  ${e.title}`, "muted");
       if (args[0] === "open" || content.events.length) say("Open the calendar with `open agenda`.", "muted");
+      break;
+    }
+    case "konshu":
+    case "ask": {
+      const q = args.join(" ");
+      effects.push({ type: "openApp", app: "konshu", params: q ? { q } : undefined });
+      say(q ? "Konshu is pondering your question…" : "Summoning Konshu…", "muted");
       break;
     }
     case "trophies":

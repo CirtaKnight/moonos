@@ -82,7 +82,7 @@ export function Terminal({ windowId, screenId }: AppProps) {
           setTimeout(() => usePower.getState().restart(), 400);
           break;
         case "openApp":
-          openApp(fx.app as AppId);
+          openApp(fx.app as AppId, fx.params);
           break;
         case "openProject":
           openProject({ slug: fx.slug, title: fx.title });

@@ -8,7 +8,7 @@ import { useNotifications } from "./notifications";
 /** Apps that count toward "Completionist" (everything a visitor can launch directly). */
 export const TRACKED_APPS = [
   "about", "projects", "cv", "browser", "gallery", "videos", "terminal", "mail", "music",
-  "game", "settings", "games", "agenda", "trophies", "map",
+  "game", "settings", "games", "agenda", "trophies", "map", "konshu",
 ];
 
 interface AchievementsState {

@@ -8,6 +8,7 @@ import { openApp, openItem, openProject } from "../apps/launch";
 import { useContent } from "../content/ContentProvider";
 import { search, type SearchHit } from "../lib/search";
 import { useUI } from "../store/ui";
+import { KonshuAvatar } from "../apps/Konshu";
 import { AppIcon, FolderIcon } from "./AppIcon";
 import { FileThumb } from "./FileIcons";
 
@@ -26,6 +27,11 @@ export function Spotlight() {
   const hits = useMemo(() => search(query, content, searchableApps), [query, content]);
   const selected = Math.min(active, Math.max(hits.length - 1, 0));
 
+  function askKonshu() {
+    openApp("konshu", { q: query.trim() }, "Konshu", "konshu");
+    closePanel();
+  }
+
   function launch(hit: SearchHit) {
     if (hit.kind === "app") openApp(hit.id as AppId);
     else if (hit.kind === "project") openProject({ slug: hit.slug, title: hit.title });
@@ -40,6 +46,8 @@ export function Spotlight() {
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
+    } else if (e.key === "Enter" && !hits.length && query.trim()) {
+      askKonshu();
     } else if (e.key === "Enter" && hits[selected]) {
       launch(hits[selected]);
     }
@@ -84,7 +92,7 @@ export function Spotlight() {
         </div>
         {query.trim() && (
           <ul className="scroll-area max-h-[min(420px,55vh)] p-2" role="listbox">
-            {hits.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted">No results for “{query}”.</li>}
+            {hits.length === 0 && <li className="px-3 pt-4 pb-1 text-center text-sm text-muted">No results for “{query}”.</li>}
             {hits.map((hit, i) => (
               <li key={`${hit.kind}:${hit.title}:${i}`} role="option" aria-selected={i === selected}>
                 <button
@@ -111,6 +119,19 @@ export function Spotlight() {
                 </button>
               </li>
             ))}
+            <li className="mt-1 border-t border-line pt-1">
+              <button
+                type="button"
+                onClick={askKonshu}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent/15 ${!hits.length ? "bg-accent/15" : ""}`}
+              >
+                <KonshuAvatar size={30} />
+                <span className="min-w-0 flex-1 truncate text-sm text-fg">
+                  Ask Konshu: <span className="text-muted">“{query.trim()}”</span>
+                </span>
+                {!hits.length && <CornerDownLeft size={14} className="shrink-0 text-muted" />}
+              </button>
+            </li>
           </ul>
         )}
       </motion.div>
