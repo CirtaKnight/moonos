@@ -84,6 +84,7 @@ export function ResumeDocument({ resume: r, siteUrl }: { resume: Resume; siteUrl
     <Document title={`${r.name} — Résumé`} author={r.name} subject={r.title} creator="MoonOS" producer="MoonOS">
       <Page size="A4" style={s.page}>
         <View style={s.header}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
           {avatar ? <Image src={avatar} style={s.avatar} /> : null}
           <View style={{ flex: 1 }}>
             <Text style={s.name}>{r.name}</Text>
