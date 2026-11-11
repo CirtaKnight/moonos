@@ -132,6 +132,9 @@ export interface SiteSettings {
   wallpapers: Wallpaper[];
 }
 
+export type { ContributionDay } from "../lib/github";
+import type { ContributionDay } from "../lib/github";
+
 export interface ActivityItem {
   id: string;
   kind: "push" | "create" | "release" | "pr" | "star" | "fork";
@@ -181,6 +184,8 @@ export interface OSContent {
   announcements: Announcement[];
   events: AgendaEvent[];
   experiences: Experience[];
+  /** Last year of GitHub contributions (may be empty). */
+  contributions: ContributionDay[];
   /** "cms" when served from Sanity, "fallback" when using built-in defaults. */
   source: "cms" | "fallback";
 }

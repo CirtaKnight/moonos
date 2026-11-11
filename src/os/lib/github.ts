@@ -108,3 +108,67 @@ export function timeAgo(iso: string | undefined, now = Date.now()): string {
   if (s < 7 * 86400) return `${Math.floor(s / 86400)}d ago`;
   return new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
+
+/* --------------------------------- Contribution calendar --------------------------------- */
+
+export interface ContributionDay {
+  date: string;
+  /** GitHub's 0–4 intensity bucket. */
+  level: 0 | 1 | 2 | 3 | 4;
+  count: number;
+}
+
+const clampLevel = (n: number) => Math.max(0, Math.min(4, Math.round(n))) as ContributionDay["level"];
+
+/** Parse github.com/users/<u>/contributions (public HTML, no token needed). */
+export function parseContributionsHtml(html: string): ContributionDay[] {
+  const counts = new Map<string, number>();
+  for (const m of html.matchAll(/<tool-tip[^>]*\bfor="([^"]+)"[^>]*>([^<]*)<\/tool-tip>/g)) {
+    const n = m[2].match(/^(\d[\d,]*) contributions?/);
+    counts.set(m[1], n ? Number(n[1].replace(/,/g, "")) : 0);
+  }
+  const days: ContributionDay[] = [];
+  for (const m of html.matchAll(/<td\b[^>]*>/g)) {
+    const tag = m[0];
+    const date = tag.match(/data-date="(\d{4}-\d{2}-\d{2})"/)?.[1];
+    const level = tag.match(/data-level="(\d)"/)?.[1];
+    if (!date || level == null) continue;
+    const id = tag.match(/\bid="([^"]+)"/)?.[1];
+    days.push({ date, level: clampLevel(Number(level)), count: (id ? counts.get(id) : undefined) ?? (Number(level) ? 1 : 0) });
+  }
+  return days.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+const LEVELS: Record<string, ContributionDay["level"]> = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 };
+
+ 
+export function mapContributionCalendar(data: any): ContributionDay[] {
+  const weeks = data?.data?.user?.contributionsCollection?.contributionCalendar?.weeks ?? [];
+  return weeks
+     
+    .flatMap((w: any) => w.contributionDays ?? [])
+     
+    .map((d: any) => ({ date: d.date, count: d.contributionCount ?? 0, level: LEVELS[d.contributionLevel] ?? 0 }))
+    .sort((a: ContributionDay, b: ContributionDay) => a.date.localeCompare(b.date));
+}
+
+export function contributionStats(days: ContributionDay[], today?: string) {
+  const total = days.reduce((s, d) => s + d.count, 0);
+  let longest = 0;
+  let run = 0;
+  for (const d of days) {
+    run = d.count > 0 ? run + 1 : 0;
+    longest = Math.max(longest, run);
+  }
+  // Current streak counts back from today (or yesterday, if today is still empty).
+  const upto = today ? days.filter((d) => d.date <= today) : days;
+  let i = upto.length - 1;
+  if (i >= 0 && upto[i].count === 0) i--;
+  let current = 0;
+  while (i >= 0 && upto[i].count > 0) {
+    current++;
+    i--;
+  }
+  const busiest = days.reduce<ContributionDay | null>((b, d) => (!b || d.count > b.count ? d : b), null);
+  return { total, longest, current, busiest: busiest && busiest.count > 0 ? busiest : null, activeDays: days.filter((d) => d.count > 0).length };
+}

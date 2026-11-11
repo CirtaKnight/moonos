@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import { mapGithubEvents, mapRepo } from "../lib/github";
+import { mapContributionCalendar, mapGithubEvents, mapRepo, parseContributionsHtml, type ContributionDay } from "../lib/github";
 import type { ActivityItem, RepoStats } from "./types";
 
 const API = "https://api.github.com";
@@ -41,5 +41,43 @@ export async function getRepoStats(fullName: string): Promise<RepoStats | null> 
     return mapRepo(await res.json());
   } catch {
     return null;
+  }
+}
+
+const CALENDAR_QUERY = `query($login: String!) {
+  user(login: $login) {
+    contributionsCollection {
+      contributionCalendar { weeks { contributionDays { date contributionCount contributionLevel } } }
+    }
+  }
+}`;
+
+/**
+ * The last year of contributions, cached ~6 hours. Uses the GraphQL API when GITHUB_TOKEN is
+ * set (exact, includes private-contribution counts if the owner enabled them), otherwise the
+ * public contributions page. Never throws.
+ */
+export async function getContributions(username: string): Promise<ContributionDay[]> {
+  "use cache";
+  cacheTag("github");
+  cacheLife({ stale: 3600, revalidate: 6 * 3600, expire: 86_400 });
+  try {
+    if (process.env.GITHUB_TOKEN) {
+      const res = await fetch("https://api.github.com/graphql", {
+        method: "POST",
+        headers: { ...headers(), "Content-Type": "application/json" },
+        body: JSON.stringify({ query: CALENDAR_QUERY, variables: { login: username } }),
+      });
+      if (res.ok) {
+        const days = mapContributionCalendar(await res.json());
+        if (days.length) return days;
+      }
+    }
+    const res = await fetch(`https://github.com/users/${encodeURIComponent(username)}/contributions`, {
+      headers: { "User-Agent": "MoonOS", Accept: "text/html" },
+    });
+    return res.ok ? parseContributionsHtml(await res.text()) : [];
+  } catch {
+    return [];
   }
 }

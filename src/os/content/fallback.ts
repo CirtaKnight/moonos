@@ -87,6 +87,7 @@ export const fallbackContent: OSContent = {
   announcements: [],
   events: [],
   experiences: [],
+  contributions: [],
   settings: {
     bootLines: DEFAULT_BOOT_LINES,
     welcomeNote:

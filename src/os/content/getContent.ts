@@ -7,7 +7,7 @@ import { githubUser } from "../lib/links";
 import { parseRepo } from "../lib/github";
 import { parsePlace } from "../lib/place";
 import { fallbackContent } from "./fallback";
-import { getGithubActivity, getRepoStats } from "./github";
+import { getContributions, getGithubActivity, getRepoStats } from "./github";
 import type { OSContent, Profile, Project, SiteSettings } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw CMS payload is normalised below */
@@ -106,6 +106,7 @@ export async function getContent(): Promise<OSContent> {
       tracks: compact<any>(raw?.tracks),
       settings: toSettings(raw?.settings),
       activity: [],
+      contributions: [],
       announcements: compact<any>(raw?.announcements).map((a) => ({
         id: a.id,
         title: a.title,
@@ -156,8 +157,9 @@ export async function getContent(): Promise<OSContent> {
 export async function getOSContent(): Promise<OSContent> {
   const content = await getContent();
   const user = githubUser(content);
-  const [activity, repos] = await Promise.all([
+  const [activity, contributions, repos] = await Promise.all([
     getGithubActivity(user),
+    getContributions(user),
     Promise.all(
       content.projects.map(async (p) => {
         const full = parseRepo(p.repo?.url);
@@ -168,6 +170,7 @@ export async function getOSContent(): Promise<OSContent> {
   return {
     ...content,
     activity,
+    contributions,
     projects: content.projects.map((p, i) => ({ ...p, repo: repos[i] ?? undefined })),
   };
 }

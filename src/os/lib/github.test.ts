@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapGithubEvents, mapRepo, parseRepo, timeAgo } from "./github";
+import { contributionStats, mapContributionCalendar, mapGithubEvents, mapRepo, parseContributionsHtml, parseRepo, timeAgo } from "./github";
 
 const at = "2026-11-10T10:00:00Z";
 
@@ -64,5 +64,40 @@ describe("timeAgo", () => {
     expect(timeAgo("2026-11-10T09:00:00Z", now)).toBe("3h ago");
     expect(timeAgo("2026-11-08T12:00:00Z", now)).toBe("2d ago");
     expect(timeAgo("2026-10-01T12:00:00Z", now)).toBe("1 Oct");
+  });
+});
+
+describe("contribution calendar", () => {
+  const html = `
+    <td data-date="2026-11-08" id="d-0" data-level="0" class="x"></td>
+    <td data-date="2026-11-09" id="d-1" data-level="2"></td>
+    <td data-date="2026-11-10" id="d-2" data-level="4"></td>
+    <td data-date="2026-11-11" id="d-3" data-level="0"></td>
+    <tool-tip for="d-0">No contributions on November 8th.</tool-tip>
+    <tool-tip for="d-1">3 contributions on November 9th.</tool-tip>
+    <tool-tip for="d-2">1,204 contributions on November 10th.</tool-tip>
+    <tool-tip for="d-3">No contributions on November 11th.</tool-tip>`;
+
+  it("parses the public calendar HTML", () => {
+    const days = parseContributionsHtml(html);
+    expect(days.map((d) => [d.date, d.level, d.count])).toEqual([
+      ["2026-11-08", 0, 0],
+      ["2026-11-09", 2, 3],
+      ["2026-11-10", 4, 1204],
+      ["2026-11-11", 0, 0],
+    ]);
+  });
+
+  it("maps the GraphQL calendar", () => {
+    const days = mapContributionCalendar({
+      data: { user: { contributionsCollection: { contributionCalendar: { weeks: [{ contributionDays: [{ date: "2026-01-02", contributionCount: 5, contributionLevel: "THIRD_QUARTILE" }] }] } } } },
+    });
+    expect(days).toEqual([{ date: "2026-01-02", count: 5, level: 3 }]);
+  });
+
+  it("computes totals and streaks (today may still be empty)", () => {
+    const s = contributionStats(parseContributionsHtml(html), "2026-11-11");
+    expect(s).toMatchObject({ total: 1207, longest: 2, current: 2, activeDays: 2 });
+    expect(s.busiest?.date).toBe("2026-11-10");
   });
 });
