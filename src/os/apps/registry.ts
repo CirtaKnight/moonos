@@ -21,6 +21,7 @@ import {
   ResumeGlyph,
   SettingsGlyph,
   SkillsGlyph,
+  SourceGlyph,
   TerminalGlyph,
   TrophiesGlyph,
   VideosGlyph,
@@ -34,6 +35,7 @@ import { CV } from "./CV";
 import { Folder as FolderApp } from "./Folder";
 import { Info } from "./Info";
 import { Skills } from "./Skills";
+import { Source } from "./Source";
 import { Konshu } from "./Konshu";
 import { MapApp } from "./MapApp";
 import { Gallery, Videos } from "./Media";
@@ -82,6 +84,7 @@ export const APP_IDS = [
   "konshu",
   "skills",
   "activity",
+  "source",
 ] as const;
 export type AppId = (typeof APP_IDS)[number];
 
@@ -102,7 +105,7 @@ export const apps: Record<AppId, AppDefinition> = {
   videos: { id: "videos", name: "Videos", icon: VideosGlyph, tint: WORK, component: Videos, size: { w: 900, h: 580 }, listed: true, pinned: false },
   terminal: { id: "terminal", name: "Terminal", icon: TerminalGlyph, tint: SYSTEM, component: Terminal, size: { w: 720, h: 460 }, listed: true, pinned: true, description: "Type `help`" },
   mail: { id: "mail", name: "Mail", icon: MailGlyph, tint: WORK, component: MailApp, size: { w: 620, h: 560 }, listed: true, pinned: true, description: "Contact me" },
-  music: { id: "music", name: "Music", icon: MusicGlyph, tint: PLAY, component: Music, size: { w: 420, h: 540 }, listed: true, pinned: false },
+  music: { id: "music", name: "Music", icon: MusicGlyph, tint: PLAY, component: Music, size: { w: 420, h: 540 }, listed: false, pinned: false },
   game: { id: "game", name: "Lunar Drift", icon: DriftGlyph, tint: PLAY, component: Game, size: { w: 560, h: 600 }, listed: false, pinned: false, description: "A tiny game" },
   settings: { id: "settings", name: "Settings", icon: SettingsGlyph, tint: SYSTEM, component: Settings, size: { w: 700, h: 500 }, listed: true, pinned: true },
   bin: { id: "bin", name: "Recycle Bin", icon: BinGlyph, tint: SYSTEM, component: Bin, size: { w: 720, h: 460 }, listed: false, pinned: false },
@@ -118,6 +121,7 @@ export const apps: Record<AppId, AppDefinition> = {
   konshu: { id: "konshu", name: "Konshu", icon: KonshuGlyph, tint: PLAY, component: Konshu, size: { w: 460, h: 600 }, listed: true, pinned: true, description: "Ask the guide anything" },
   skills: { id: "skills", name: "Skills", icon: SkillsGlyph, tint: WORK, component: Skills, size: { w: 900, h: 600 }, listed: true, pinned: false, description: "Skills constellation" },
   activity: { id: "activity", name: "Activity", icon: ActivityGlyph, tint: WORK, component: Activity, size: { w: 860, h: 560 }, listed: true, pinned: false, description: "GitHub activity in moon phases" },
+  source: { id: "source", name: "Source", icon: SourceGlyph, tint: SYSTEM, component: Source, size: { w: 980, h: 620 }, listed: true, pinned: false, description: "Browse MoonOS's own code" },
 };
 
 export function getApp(id: string): AppDefinition {

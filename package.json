@@ -30,6 +30,7 @@
     "server-only": "^0.0.1",
     "simple-icons": "^16.37.0",
     "styled-components": "^6.6.0",
+    "sugar-high": "~2.6.4",
     "zustand": "^5.1.0"
   },
   "devDependencies": {

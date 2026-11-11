@@ -186,3 +186,32 @@ textarea {
 .moon-map .maplibregl-ctrl-attrib-button {
   filter: invert(1);
 }
+
+/* ------------------------------- Source explorer ------------------------------- */
+/* sugar-high token colours, in the MoonOS palette */
+.moon-code {
+  --sh-class: #bccbeb;
+  --sh-identifier: #d5dbe8;
+  --sh-sign: #6f7890;
+  --sh-property: #9fc3e8;
+  --sh-entity: #8ea7dc;
+  --sh-jsxliterals: #e9ecf3;
+  --sh-string: #c8a96f;
+  --sh-keyword: #f29fb8;
+  --sh-comment: #5c6478;
+  counter-reset: line;
+}
+/* Lines stay inline: the highlighter already separates them with newlines. */
+.moon-code .sh__line {
+  padding-right: 1rem;
+}
+.moon-code .sh__line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 3.2rem;
+  padding-right: 1rem;
+  text-align: right;
+  color: #3a4152;
+  user-select: none;
+}

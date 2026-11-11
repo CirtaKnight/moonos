@@ -200,6 +200,15 @@ export const ActivityGlyph = glyph(
   </>,
 );
 
+/** Source: code brackets around a gold slash. */
+export const SourceGlyph = glyph(
+  "source",
+  <>
+    <path d="M8 7l-5 5 5 5M16 7l5 5-5 5" />
+    <path d="M13.5 5.5l-3 13" {...gold} />
+  </>,
+);
+
 /* --------------------------------------- System --------------------------------------- */
 
 /** Terminal: a prompt chevron and a gold caret. */
