@@ -84,6 +84,9 @@ export function Terminal({ windowId, screenId }: AppProps) {
         case "openApp":
           openApp(fx.app as AppId, fx.params);
           break;
+        case "openUrl":
+          window.open(fx.href, "_blank", "noopener,noreferrer");
+          break;
         case "openProject":
           openProject({ slug: fx.slug, title: fx.title });
           break;

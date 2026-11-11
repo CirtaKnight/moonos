@@ -15,7 +15,8 @@ export type Effect =
   | { type: "openApp"; app: string; params?: Record<string, string> }
   | { type: "openProject"; slug: string; title: string }
   | { type: "openItem"; slug: string; item: ProjectItem }
-  | { type: "achievement"; id: string };
+  | { type: "achievement"; id: string }
+  | { type: "openUrl"; href: string };
 
 export interface Result {
   lines: Line[];
@@ -132,6 +133,7 @@ export const COMMANDS: Record<string, string> = {
   open: "open a file, project or app",
   projects: "list projects",
   cv: "open my résumé",
+  recruiter: "one-page summary for recruiters",
   socials: "where to find me",
   contact: "send me a message",
   neofetch: "system info",
@@ -257,6 +259,11 @@ export function runCommand(
       if (visible.length) say("Open one with `open <name>`.", "muted");
       break;
     }
+    case "recruiter":
+    case "hr":
+      say("Opening the one-page recruiter view in a new tab…", "muted");
+      effects.push({ type: "openUrl", href: "/recruiter" });
+      break;
     case "cv":
     case "resume":
       effects.push({ type: "openApp", app: "cv" });

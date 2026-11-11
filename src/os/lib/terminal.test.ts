@@ -27,6 +27,10 @@ describe("terminal", () => {
     expect(text(run("help"))).toContain("whoami");
   });
 
+  it("opens the recruiter view in a new tab", () => {
+    expect(run("recruiter").effects).toEqual([{ type: "openUrl", href: "/recruiter" }]);
+  });
+
   it("navigates the virtual filesystem", () => {
     expect(text(run("ls"))).toContain("projects/");
     const cd = run("cd projects");
