@@ -74,3 +74,36 @@ export function clampMenu(x: number, y: number, w: number, h: number, vw: number
     y: y + h + margin > vh ? Math.max(margin, vh - h - margin) : y,
   };
 }
+
+/**
+ * Move a group of icons by the same cell offset. The offset is clamped so the whole group
+ * stays on the grid; icons sitting where the group lands are moved into the cells the group
+ * vacated (in reading order), so nothing is ever stacked or lost.
+ */
+export function moveIcons(layout: Layout, ids: string[], dc: number, dr: number, rows: number, cols: number): Layout {
+  const moving = ids.filter((id) => layout[id]);
+  if (!moving.length) return layout;
+  const cs = moving.map((id) => layout[id].c);
+  const rs = moving.map((id) => layout[id].r);
+  const cdc = Math.max(-Math.min(...cs), Math.min(dc, cols - 1 - Math.max(...cs)));
+  const cdr = Math.max(-Math.min(...rs), Math.min(dr, rows - 1 - Math.max(...rs)));
+  if (cdc === 0 && cdr === 0) return layout;
+
+  const next: Layout = { ...layout };
+  const movingSet = new Set(moving);
+  const targets = new Map(moving.map((id) => [id, { c: layout[id].c + cdc, r: layout[id].r + cdr }]));
+  const targetKeys = new Set([...targets.values()].map(key));
+  const vacated = moving
+    .map((id) => layout[id])
+    .filter((cell) => !targetKeys.has(key(cell)))
+    .sort((a, b) => a.c - b.c || a.r - b.r);
+  const displaced = Object.keys(layout)
+    .filter((id) => !movingSet.has(id) && targetKeys.has(key(layout[id])))
+    .sort((a, b) => layout[a].c - layout[b].c || layout[a].r - layout[b].r);
+
+  for (const [id, cell] of targets) next[id] = cell;
+  displaced.forEach((id, i) => {
+    next[id] = vacated[i];
+  });
+  return next;
+}

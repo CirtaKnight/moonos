@@ -40,6 +40,24 @@ test.describe("MoonOS v2 — desktop", () => {
     expect(Math.abs(reloaded!.y - after!.y)).toBeLessThan(20);
   });
 
+  test("a multi-selection drags together", async ({ page }) => {
+    await boot(page);
+    const a = page.locator('[data-icon="welcome"]');
+    const b = page.locator('[data-icon="about"]');
+    await a.click();
+    await b.click({ modifiers: ["Control"] });
+    const [a0, b0] = [await a.boundingBox(), await b.boundingBox()];
+    await page.mouse.move(a0!.x + 40, a0!.y + 30);
+    await page.mouse.down();
+    await page.mouse.move(a0!.x + 40 + 3 * 92, a0!.y + 30, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    const [a1, b1] = [await a.boundingBox(), await b.boundingBox()];
+    expect(a1!.x - a0!.x).toBeGreaterThan(200);
+    expect(b1!.x - b0!.x).toBeGreaterThan(200);
+    expect(Math.abs(b1!.y - a1!.y - (b0!.y - a0!.y))).toBeLessThan(4);
+  });
+
   test("terminal easter egg unlocks an achievement", async ({ page }) => {
     await boot(page);
     await page.keyboard.press("Alt+t");

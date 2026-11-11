@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cellAt, clampMenu, intersects, moveIcon, placeIcons, rectFrom } from "./iconGrid";
+import { cellAt, clampMenu, intersects, moveIcon, moveIcons, placeIcons, rectFrom } from "./iconGrid";
 
 describe("placeIcons", () => {
   it("fills column-major in default order", () => {
@@ -42,5 +42,36 @@ describe("geometry helpers", () => {
   it("keeps menus inside the viewport", () => {
     expect(clampMenu(10, 10, 200, 100, 1000, 800)).toEqual({ x: 10, y: 10 });
     expect(clampMenu(950, 780, 200, 100, 1000, 800)).toEqual({ x: 794, y: 694 });
+  });
+});
+
+describe("moveIcons", () => {
+  const base = { a: { c: 0, r: 0 }, b: { c: 0, r: 1 }, x: { c: 2, r: 0 } };
+
+  it("moves a group by the same offset", () => {
+    const l = moveIcons(base, ["a", "b"], 1, 0, 4, 4);
+    expect(l.a).toEqual({ c: 1, r: 0 });
+    expect(l.b).toEqual({ c: 1, r: 1 });
+    expect(l.x).toEqual({ c: 2, r: 0 });
+  });
+
+  it("clamps the offset so the group stays on the grid", () => {
+    const l = moveIcons(base, ["a", "b"], 0, 9, 3, 4);
+    expect(l.a).toEqual({ c: 0, r: 1 });
+    expect(l.b).toEqual({ c: 0, r: 2 });
+  });
+
+  it("moves displaced icons into the vacated cells", () => {
+    const l = moveIcons(base, ["a", "b"], 2, 0, 4, 4);
+    expect(l.a).toEqual({ c: 2, r: 0 });
+    expect(l.b).toEqual({ c: 2, r: 1 });
+    expect(l.x).toEqual({ c: 0, r: 0 });
+    const cells = Object.values(l).map((c) => `${c.c}:${c.r}`);
+    expect(new Set(cells).size).toBe(cells.length);
+  });
+
+  it("is a no-op for an empty selection or zero offset", () => {
+    expect(moveIcons(base, [], 1, 1, 4, 4)).toBe(base);
+    expect(moveIcons(base, ["a"], 0, 0, 4, 4)).toBe(base);
   });
 });

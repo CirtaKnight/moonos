@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { useContent } from "../content/ContentProvider";
 import { useDesktopEntries, type DesktopEntry } from "../desktopEntries";
-import { cellAt, intersects, moveIcon, placeIcons, rectFrom, type Rect } from "../lib/iconGrid";
+import { cellAt, intersects, moveIcon, moveIcons, placeIcons, rectFrom, type Rect } from "../lib/iconGrid";
 import { desktopMenu, iconMenu, setSelectionOpener } from "../menus";
 import { contextMenuProps } from "../store/contextMenu";
 import { useSettings } from "../store/settings";
@@ -31,7 +31,7 @@ export function DesktopIcons() {
   const selected = useUI((s) => s.selectedIcons);
   const selectIcons = useUI((s) => s.selectIcons);
   const refreshTick = useUI((s) => s.refreshTick);
-  const [drag, setDrag] = useState<{ id: string; dx: number; dy: number } | null>(null);
+  const [drag, setDrag] = useState<{ ids: string[]; dx: number; dy: number } | null>(null);
   const [box, setBox] = useState<Rect | null>(null);
   const areaRef = useRef<HTMLDivElement>(null);
 
@@ -107,13 +107,16 @@ export function DesktopIcons() {
     const start = { x: e.clientX, y: e.clientY };
     const el = e.currentTarget;
     let dragging = false;
+    // Dragging an icon that is part of a multi-selection moves the whole selection.
+    const selection = useUI.getState().selectedIcons;
+    const group = selection.length > 1 && selection.includes(entry.id) ? selection : [entry.id];
     el.setPointerCapture(e.pointerId);
     const move = (ev: PointerEvent) => {
       const dx = ev.clientX - start.x;
       const dy = ev.clientY - start.y;
       if (!dragging && Math.hypot(dx, dy) < 6) return;
       dragging = true;
-      setDrag({ id: entry.id, dx, dy });
+      setDrag({ ids: group, dx, dy });
     };
     const up = (ev: PointerEvent) => {
       el.removeEventListener("pointermove", move);
@@ -122,7 +125,12 @@ export function DesktopIcons() {
       if (dragging) {
         const r = iconRect(entry.id);
         const target = cellAt(r.x + ev.clientX - start.x + ICON_W / 2 - PAD, r.y + ev.clientY - start.y + ICON_H / 2 - PAD, CELL_W, CELL_H, rows, cols);
-        setIconLayout(moveIcon(layout, entry.id, target));
+        const from = layout[entry.id];
+        setIconLayout(
+          group.length > 1
+            ? moveIcons(layout, group, target.c - from.c, target.r - from.r, rows, cols)
+            : moveIcon(layout, entry.id, target),
+        );
         setDrag(null);
         return;
       }
@@ -155,7 +163,7 @@ export function DesktopIcons() {
       {entries.map((e, i) => {
         const r = iconRect(e.id);
         const isSel = selected.includes(e.id);
-        const isDrag = drag?.id === e.id;
+        const isDrag = drag?.ids.includes(e.id) ?? false;
         const menu = contextMenuProps(() => {
           if (!useUI.getState().selectedIcons.includes(e.id)) selectIcons([e.id]);
           return iconMenu(e, useUI.getState().selectedIcons.length);
@@ -172,7 +180,7 @@ export function DesktopIcons() {
               left: r.x,
               top: r.y,
               zIndex: isDrag ? 5 : 1,
-              transform: isDrag ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined,
+              transform: isDrag && drag ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined,
               transition: isDrag ? "none" : "left 200ms ease, top 200ms ease",
             }}
           >
