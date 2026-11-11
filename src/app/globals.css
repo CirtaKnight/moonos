@@ -107,6 +107,25 @@ textarea {
   outline-offset: 2px;
 }
 
+/* Text fields show focus through their caret and their own border, never the offset
+   keyboard ring (it drew a bright box around the Terminal, search and typing fields). */
+input:not([type="checkbox"], [type="radio"], [type="range"], [type="button"], [type="submit"]):focus-visible,
+textarea:focus-visible,
+[contenteditable]:focus-visible {
+  outline: none;
+}
+
+/* Browser autofill paints a light box; keep filled fields on the night palette. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  box-shadow: 0 0 0 1000px var(--surface-solid) inset;
+  transition: background-color 9999s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
