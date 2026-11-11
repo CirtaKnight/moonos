@@ -99,7 +99,7 @@ export const apps: Record<AppId, AppDefinition> = {
   folder: { id: "folder", name: "Folder", icon: FolderGlyph, tint: WORK, component: FolderApp, size: { w: 860, h: 560 }, listed: false, pinned: false },
   viewer: { id: "viewer", name: "Viewer", icon: ViewerGlyph, tint: SYSTEM, component: Viewer, size: { w: 900, h: 620 }, listed: false, pinned: false },
   note: { id: "note", name: "Notes", icon: NoteGlyph, tint: SYSTEM, component: Note, size: { w: 560, h: 440 }, listed: false, pinned: false },
-  cv: { id: "cv", name: "Résumé", icon: ResumeGlyph, tint: WORK, component: CV, size: { w: 780, h: 640 }, listed: true, pinned: true, description: "My CV" },
+  cv: { id: "cv", name: "Résumé", icon: ResumeGlyph, tint: WORK, component: CV, size: { w: 780, h: 640 }, listed: true, pinned: true, description: "My CV, one-page summary and recruiter view" },
   browser: { id: "browser", name: "Browser", icon: BrowserGlyph, tint: WORK, component: Browser, size: { w: 940, h: 600 }, listed: true, pinned: true, description: "Find me online" },
   gallery: { id: "gallery", name: "Gallery", icon: GalleryGlyph, tint: WORK, component: Gallery, size: { w: 860, h: 580 }, listed: true, pinned: true },
   videos: { id: "videos", name: "Videos", icon: VideosGlyph, tint: WORK, component: Videos, size: { w: 900, h: 580 }, listed: true, pinned: false },

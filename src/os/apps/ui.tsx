@@ -52,7 +52,8 @@ export function Button({
   href?: string;
   icon?: LucideIcon;
   variant?: "primary" | "secondary";
-  download?: boolean;
+  /** true, or the suggested filename. */
+  download?: boolean | string;
 }) {
   const cls = `inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-sm font-medium transition-colors ${
     variant === "primary"
