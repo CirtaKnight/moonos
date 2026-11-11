@@ -130,3 +130,56 @@ test.describe("MoonOS v2 — mobile", () => {
     await expect(page.getByRole("menuitem", { name: "Get info" })).toBeVisible();
   });
 });
+
+test.describe("MoonOS v2 — phone home gestures", () => {
+  test.skip(({ isMobile }) => !isMobile, "mobile only");
+
+  test("short screens get several pages that swipe, and icons can be dragged", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 640 });
+    await boot(page);
+    await expect(page.getByRole("button", { name: "Page 2" })).toBeVisible();
+
+    // Every visible icon sits fully inside the grid (nothing hidden behind the dock).
+    const fits = await page.evaluate(() => {
+      const grid = document.querySelector("[data-home-grid]")!.getBoundingClientRect();
+      return [...document.querySelectorAll("[data-home-id]")]
+        .map((b) => b.getBoundingClientRect())
+        .filter((r) => r.left >= 0 && r.left < innerWidth)
+        .every((r) => r.bottom <= grid.bottom + 1);
+    });
+    expect(fits).toBe(true);
+
+    // Swipe left with a touch-like pointer.
+    await page.evaluate(async () => {
+      const el = document.querySelector("[data-home-grid]")!;
+      const r = el.getBoundingClientRect();
+      const ev = (type: string, x: number) =>
+        new PointerEvent(type, { bubbles: true, clientX: x, clientY: r.top + 60, pointerId: 3, pointerType: "touch", isPrimary: true });
+      el.dispatchEvent(ev("pointerdown", r.right - 30));
+      for (let i = 1; i <= 8; i++) window.dispatchEvent(ev("pointermove", r.right - 30 - i * 35));
+      window.dispatchEvent(ev("pointerup", r.right - 30 - 8 * 35));
+    });
+    await expect(page.getByRole("button", { name: "Page 2" })).toHaveAttribute("aria-current", "page");
+
+    // Long-press then move an icon onto the first slot of page 2.
+    const moved = await page.evaluate(async () => {
+      const visible = [...document.querySelectorAll<HTMLElement>("[data-home-id]")].filter((b) => {
+        const r = b.getBoundingClientRect();
+        return r.left >= 0 && r.left < innerWidth;
+      });
+      const [first, second] = visible;
+      const a = first.getBoundingClientRect();
+      const b = second.getBoundingClientRect();
+      const ev = (type: string, x: number, y: number) =>
+        new PointerEvent(type, { bubbles: true, clientX: x, clientY: y, pointerId: 4, pointerType: "touch", isPrimary: true });
+      second.dispatchEvent(ev("pointerdown", b.left + 40, b.top + 30));
+      await new Promise((r) => setTimeout(r, 600));
+      for (let i = 1; i <= 6; i++) window.dispatchEvent(ev("pointermove", b.left + 40 + ((a.left - b.left) * i) / 6, a.top + 30));
+      window.dispatchEvent(ev("pointerup", a.left + 40, a.top + 30));
+      await new Promise((r) => setTimeout(r, 450));
+      const nowFirst = second.getBoundingClientRect();
+      return { id: second.dataset.homeId, x: Math.round(nowFirst.left), expected: Math.round(a.left) };
+    });
+    expect(moved.x).toBe(moved.expected);
+  });
+});
