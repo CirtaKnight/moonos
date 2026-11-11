@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import { RECRUITER_PATH } from "./lib/resume";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Boot } from "./components/Boot";
 import { LockScreen } from "./components/LockScreen";
@@ -12,7 +13,6 @@ import { useMediaQuery } from "./hooks";
 import { Phone } from "./mobile/Phone";
 import { usePhone } from "./store/phone";
 import { usePower } from "./store/power";
-import { launchQuickView } from "./useDeepLinks";
 import { useSettings } from "./store/settings";
 
 export const PHONE_QUERY = "(max-width: 767px), (pointer: coarse) and (max-height: 500px)";
@@ -48,12 +48,6 @@ export function OS({ content }: { content: OSContent }) {
     usePower.getState().bootDone();
   };
 
-  const onQuickView = () => {
-    onBootDone();
-    // Wait for the shell to measure itself before tiling windows.
-    setTimeout(launchQuickView, 150);
-  };
-
   return (
     <ContentProvider content={content}>
       {power === "booting" &&
@@ -62,7 +56,7 @@ export function OS({ content }: { content: OSContent }) {
             lines={content.settings.bootLines}
             short={(hasBooted || deepLinked) && !fullBoot}
             onDone={onBootDone}
-            onQuickView={onQuickView}
+            recruiterHref={RECRUITER_PATH}
           />
         ) : (
           <div className="fixed inset-0 bg-[#030409]" />
