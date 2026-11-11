@@ -185,3 +185,45 @@ test.describe("MoonOS v2 — phone home gestures", () => {
       .toBe(moved.expected);
   });
 });
+
+test.describe("MoonOS v2 — window previews and memory", () => {
+  test.skip(({ isMobile }) => isMobile, "desktop only");
+
+  test("windows come back after a reload, where they were left", async ({ page }) => {
+    await boot(page);
+    await page.locator('[data-icon="about"]').dblclick();
+    const win = page.locator('[data-window="about"]');
+    await expect(win).toBeVisible();
+    const bar = win.locator("> div").first();
+    const box = (await bar.boundingBox())!;
+    await page.mouse.move(box.x + 160, box.y + 15);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 260, box.y + 75, { steps: 6 });
+    await page.mouse.up();
+    const left = await win.evaluate((el) => (el as HTMLElement).style.left);
+    await page.waitForTimeout(600); // saved after a short debounce
+
+    await boot(page);
+    await expect(page.locator('[data-window="about"]')).toBeVisible();
+    expect(await page.locator('[data-window="about"]').evaluate((el) => (el as HTMLElement).style.left)).toBe(left);
+  });
+
+  test("hovering a running app shows previews in the dock and the taskbar", async ({ page }) => {
+    for (const layout of ["dock", "taskbar"] as const) {
+      await page.goto("/");
+      await page.evaluate((l) => {
+        localStorage.clear();
+        localStorage.setItem("ck-os-settings", JSON.stringify({ state: { layout: l, hasBooted: true, restoreWindows: false }, version: 4 }));
+      }, layout);
+      await boot(page);
+      await page.locator('[data-icon="terminal"]').dblclick();
+      await expect(page.locator('[data-window="terminal"]')).toBeVisible();
+      await page.locator('[data-dock="terminal"]').first().hover();
+      const preview = page.getByRole("group", { name: "Terminal windows" });
+      await expect(preview).toBeVisible();
+      await expect(preview.getByRole("button", { name: /Show Terminal/ })).toBeVisible();
+      await preview.getByRole("button", { name: /Close Terminal/ }).click();
+      await expect(page.locator('[data-window="terminal"]')).toHaveCount(0);
+    }
+  });
+});
