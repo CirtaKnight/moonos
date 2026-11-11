@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ChevronRight, Keyboard, Lock, Power, RotateCcw, Search } from "lucide-react";
+import { ChevronRight, Keyboard, Lock, PanelsTopLeft, Power, RotateCcw, Search } from "lucide-react";
+import { RECRUITER_PATH } from "../lib/resume";
 import { useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp, openProject } from "../apps/launch";
@@ -124,10 +125,18 @@ export function StartMenu() {
         <button
           type="button"
           onClick={() => togglePanel("shortcuts")}
-          className="mr-auto flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-fg"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-fg"
         >
           <Keyboard size={16} /> Shortcuts
         </button>
+        <a
+          href={RECRUITER_PATH}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mr-auto flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-fg"
+        >
+          <PanelsTopLeft size={16} /> Recruiter view
+        </a>
         <div className="relative">
           {powerOpen && (
             <div className="glass absolute right-0 bottom-11 w-44 overflow-hidden rounded-xl border border-line-strong p-1 shadow-window">
