@@ -56,3 +56,22 @@ function viewportSnapshot() {
   if (!vp || vp.w !== w || vp.h !== h) vp = { w, h };
   return vp;
 }
+
+/**
+ * Some hosts inject a fixed badge in the bottom-right corner (Netlify's free plan shows a
+ * "Powered by Netlify" badge that can't be hidden). This reports the space to keep clear so
+ * our own bottom bars never sit underneath it.
+ */
+export const HOST_BADGE = { w: 190, h: 56 };
+
+export function useHostBadge(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mo = new MutationObserver(cb);
+      mo.observe(document.body, { childList: true });
+      return () => mo.disconnect();
+    },
+    () => !!document.getElementById("nl-badge-frame"),
+    () => false,
+  );
+}

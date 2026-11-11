@@ -1,5 +1,6 @@
 "use client";
 
+import { HOST_BADGE, useHostBadge } from "../hooks";
 import { RecruiterButton } from "./RecruiterButton";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -220,10 +221,12 @@ function DockItem({
 export function Taskbar() {
   const entries = useShellEntries();
   const focusedId = useWindows((s) => s.focusedId);
+  // Keep the tray clear of a host badge pinned to the bottom-right corner.
+  const badge = useHostBadge();
   return (
     <footer
       className="glass absolute inset-x-0 bottom-0 z-[60] flex items-center gap-1 border-t border-line px-2"
-      style={{ height: TASKBAR_H }}
+      style={{ height: TASKBAR_H, paddingRight: badge ? HOST_BADGE.w : undefined }}
     >
       <StartButton variant="tile" />
       <span className="mx-1.5 h-6 w-px shrink-0 bg-line" />

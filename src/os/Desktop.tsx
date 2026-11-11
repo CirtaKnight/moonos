@@ -14,7 +14,7 @@ import { DOCK_RESERVED, Dock, MENUBAR_H, MenuBar, TASKBAR_H, Taskbar } from "./c
 import { StartMenu } from "./components/StartMenu";
 import { Wallpaper } from "./components/Wallpaper";
 import { Window } from "./components/Window";
-import { useMediaQuery, useViewport } from "./hooks";
+import { HOST_BADGE, useHostBadge, useMediaQuery, useViewport } from "./hooks";
 import { unlock } from "./store/achievements";
 import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
@@ -24,6 +24,7 @@ import { useSkyAchievements } from "./useSkyAchievements";
 
 export function Desktop() {
   const layout = useSettings((s) => s.layout);
+  const hostBadge = useHostBadge();
   const customCursor = useSettings((s) => s.customCursor);
   const finePointer = useMediaQuery("(pointer: fine)");
   const viewport = useViewport();
@@ -118,7 +119,7 @@ export function Desktop() {
         <Taskbar />
       )}
 
-      <KonshuCorner bottom={layout === "dock" ? 18 : TASKBAR_H + 14} />
+      <KonshuCorner bottom={(layout === "dock" ? 18 : TASKBAR_H + 14) + (layout === "dock" && hostBadge ? HOST_BADGE.h : 0)} />
 
       <AnimatePresence>{panel === "start" && <StartMenu key="start" />}</AnimatePresence>
       <NotificationLayer />
