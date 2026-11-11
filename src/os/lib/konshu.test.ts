@@ -22,6 +22,11 @@ describe("Konshu local brain", () => {
     expect(ask("Can I see your résumé?").actions[0]).toMatchObject({ type: "app", app: "cv" });
   });
 
+  it("sends recruiters in a hurry to the one-page view", () => {
+    expect(ask("I'm a recruiter, give me a quick overview").actions[0]).toMatchObject({ type: "url", href: "/recruiter" });
+    expect(ask("tl;dr?").actions[0]).toMatchObject({ type: "url", href: "/recruiter" });
+  });
+
   it("explains apps by name", () => {
     expect(ask("what is moonword").actions[0]).toMatchObject({ app: "moonword" });
     expect(ask("open the terminal").actions[0]).toMatchObject({ app: "terminal" });

@@ -80,6 +80,17 @@ const INTENTS: Intent[] = [
     }),
   },
   {
+    id: "recruiter",
+    match: (q) => has(q, ["recruiter", "recruiting", "hiring", "summary", "one page", "one-page", "tl dr", "tldr", "in a hurry", "quick overview"]),
+    answer: (c) => ({
+      text: `In a hurry? The recruiter view sums ${c.profile.name} up on one page — profile, experience, projects and skills — with a one-page PDF to download.`,
+      actions: [
+        { type: "url", href: "/recruiter", label: "Recruiter view" },
+        { type: "app", app: "cv", label: "Open Résumé" },
+      ],
+    }),
+  },
+  {
     id: "who",
     match: (q) => has(q, ["who (are|is) (you|he|she|they|cirtaknight|the owner)", "about (you|him|her|them)", "introduce", "tell me about"]) && !has(q, ["konshu"]),
     answer: (c) => ({
@@ -132,8 +143,13 @@ const INTENTS: Intent[] = [
     id: "cv",
     match: (q) => has(q, ["cv", "resume", "curriculum"]),
     answer: (c) => ({
-      text: c.profile.cvUrl ? "Here's the résumé. You can read it here or download the PDF." : "The résumé is being polished. The Mail app is the quickest way to ask for it.",
-      actions: [{ type: "app", app: "cv", label: "Open Résumé" }],
+      text: c.profile.cvUrl
+        ? "Here's the résumé. You can read it here or download the PDF — there's also a one-page recruiter view."
+        : "Here's a one-page summary generated from the portfolio, ready to download. The recruiter view has the same on a web page.",
+      actions: [
+        { type: "app", app: "cv", label: "Open Résumé" },
+        { type: "url", href: "/recruiter", label: "Recruiter view" },
+      ],
     }),
   },
   {
