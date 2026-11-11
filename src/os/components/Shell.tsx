@@ -3,7 +3,7 @@
 import { HOST_BADGE, useHostBadge } from "../hooks";
 import { RecruiterButton } from "./RecruiterButton";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp } from "../apps/launch";
 import { dockMenu } from "../menus";
@@ -13,6 +13,7 @@ import { useWindows, type WindowInstance } from "../store/windows";
 import type { Glyph } from "./AppGlyphs";
 import { AppIcon } from "./AppIcon";
 import { LogoMark } from "./Logo";
+import { usePreviewHover, WindowPreviews } from "./WindowPreview";
 import { Clock, MoonIndicator, TrayActions } from "./Tray";
 
 export const MENUBAR_H = 32;
@@ -185,9 +186,14 @@ function DockItem({
 }) {
   const app = apps[appId];
   const [hover, setHover] = useState(false);
+  const anchor = useRef<HTMLDivElement>(null);
+  const preview = usePreviewHover(running);
   return (
-    <div className="relative flex flex-col items-center">
-      {hover && <DockLabel text={app.name} />}
+    <div ref={anchor} className="relative flex flex-col items-center" onMouseEnter={preview.enter} onMouseLeave={preview.leave}>
+      {hover && !preview.open && <DockLabel text={app.name} />}
+      {preview.open && (
+        <WindowPreviews appId={appId} anchor={anchor} onEnter={preview.enter} onLeave={preview.leave} onPicked={preview.close} />
+      )}
       <motion.button
         type="button"
         aria-label={app.name}
@@ -202,6 +208,7 @@ function DockItem({
         transition={{ type: "spring", stiffness: 500, damping: 26 }}
         onClick={(e) => {
           e.stopPropagation();
+          preview.close();
           onClick();
         }}
       >
@@ -231,40 +238,9 @@ export function Taskbar() {
       <StartButton variant="tile" />
       <span className="mx-1.5 h-6 w-px shrink-0 bg-line" />
       <nav aria-label="Taskbar" className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-        {entries.map((entry) => {
-          const app = apps[entry.appId];
-          const running = entry.windows.length > 0;
-          const focused = entry.windows.some((w) => w.id === focusedId);
-          return (
-            <button
-              key={entry.appId}
-              type="button"
-              aria-label={app.name}
-              title={app.name}
-              data-dock={entry.appId}
-              onContextMenu={contextMenuProps(() => dockMenu(entry.appId)).onContextMenu}
-              onClick={(e) => {
-                e.stopPropagation();
-                activateEntry(entry);
-              }}
-              className={`relative flex h-10 items-center gap-2 rounded-md px-2 transition-colors hover:bg-surface-hover ${
-                focused ? "bg-surface-hover" : ""
-              }`}
-            >
-              <AppIcon icon={app.icon} tint={app.tint} size={28} />
-              {running && (
-                <span className="hidden max-w-32 truncate text-xs text-fg lg:inline">
-                  {entry.windows.length > 1 ? `${app.name} (${entry.windows.length})` : entry.windows[0].title}
-                </span>
-              )}
-              <span
-                className={`absolute bottom-0.5 left-1/2 h-[3px] -translate-x-1/2 rounded-full transition-all ${
-                  running ? (focused ? "w-5 bg-accent" : "w-2 bg-muted") : "w-0"
-                }`}
-              />
-            </button>
-          );
-        })}
+        {entries.map((entry) => (
+          <TaskbarItem key={entry.appId} entry={entry} focusedId={focusedId} />
+        ))}
       </nav>
       <div className="flex items-center gap-1">
         <RecruiterButton className="mr-2" />
@@ -276,5 +252,51 @@ export function Taskbar() {
         </span>
       </div>
     </footer>
+  );
+}
+
+function TaskbarItem({ entry, focusedId }: { entry: ShellEntry; focusedId: string | null }) {
+  const app = apps[entry.appId];
+  const running = entry.windows.length > 0;
+  const focused = entry.windows.some((w) => w.id === focusedId);
+  const anchor = useRef<HTMLButtonElement>(null);
+  const preview = usePreviewHover(running);
+  return (
+    <>
+      <button
+        ref={anchor}
+        type="button"
+        aria-label={app.name}
+        // The preview replaces the native tooltip once the app has windows.
+        title={running ? undefined : app.name}
+        data-dock={entry.appId}
+        onMouseEnter={preview.enter}
+        onMouseLeave={preview.leave}
+        onContextMenu={contextMenuProps(() => dockMenu(entry.appId)).onContextMenu}
+        onClick={(e) => {
+          e.stopPropagation();
+          preview.close();
+          activateEntry(entry);
+        }}
+        className={`relative flex h-10 shrink-0 items-center gap-2 rounded-md px-2 transition-colors hover:bg-surface-hover ${
+          focused ? "bg-surface-hover" : ""
+        }`}
+      >
+        <AppIcon icon={app.icon} tint={app.tint} size={28} />
+        {running && (
+          <span className="hidden max-w-32 truncate text-xs text-fg lg:inline">
+            {entry.windows.length > 1 ? `${app.name} (${entry.windows.length})` : entry.windows[0].title}
+          </span>
+        )}
+        <span
+          className={`absolute bottom-0.5 left-1/2 h-[3px] -translate-x-1/2 rounded-full transition-all ${
+            running ? (focused ? "w-5 bg-accent" : "w-2 bg-muted") : "w-0"
+          }`}
+        />
+      </button>
+      {preview.open && (
+        <WindowPreviews appId={entry.appId} anchor={anchor} onEnter={preview.enter} onLeave={preview.leave} onPicked={preview.close} />
+      )}
+    </>
   );
 }

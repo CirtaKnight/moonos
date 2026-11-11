@@ -142,6 +142,7 @@ function WindowFrame({ win }: { win: WindowInstance }) {
       role="dialog"
       aria-label={win.title}
       data-window={win.appId}
+      data-window-id={win.id}
       initial={{ opacity: 0, scale: 0.94, y: 12 }}
       animate={
         win.minimized
