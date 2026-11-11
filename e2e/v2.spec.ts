@@ -93,6 +93,23 @@ test.describe("MoonOS v2 — desktop", () => {
     }
   });
 
+  test("Konshu answers locally and offers actions", async ({ page }) => {
+    await boot(page, "/?open=konshu");
+    const win = page.getByRole("dialog", { name: "Konshu" });
+    await win.getByLabel("Message Konshu").fill("How can I contact you?");
+    await win.getByLabel("Message Konshu").press("Enter");
+    await expect(win.getByRole("button", { name: "Open Mail" })).toBeVisible();
+  });
+
+  test("Map, Skills, Activity and Source open", async ({ page }) => {
+    await boot(page);
+    for (const [id, name] of [["map", "Map"], ["skills", "Skills"], ["activity", "Activity"], ["source", "Source"]] as const) {
+      await page.goto(`/?open=${id}`);
+      await page.keyboard.press("Enter");
+      await expect(page.getByRole("dialog", { name })).toBeVisible({ timeout: 10_000 });
+    }
+  });
+
   test("crawlable project page renders without the OS", async ({ page }) => {
     await page.goto("/projects/moonos");
     await expect(page.getByRole("heading", { level: 1, name: "MoonOS" })).toBeVisible();
