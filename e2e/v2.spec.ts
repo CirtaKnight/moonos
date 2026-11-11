@@ -160,6 +160,7 @@ test.describe("MoonOS v2 — phone home gestures", () => {
       window.dispatchEvent(ev("pointerup", r.right - 30 - 8 * 35));
     });
     await expect(page.getByRole("button", { name: "Page 2" })).toHaveAttribute("aria-current", "page");
+    await page.waitForTimeout(500); // let the page slide finish before measuring icons
 
     // Long-press then move an icon onto the first slot of page 2.
     const moved = await page.evaluate(async () => {
@@ -176,10 +177,11 @@ test.describe("MoonOS v2 — phone home gestures", () => {
       await new Promise((r) => setTimeout(r, 600));
       for (let i = 1; i <= 6; i++) window.dispatchEvent(ev("pointermove", b.left + 40 + ((a.left - b.left) * i) / 6, a.top + 30));
       window.dispatchEvent(ev("pointerup", a.left + 40, a.top + 30));
-      await new Promise((r) => setTimeout(r, 450));
-      const nowFirst = second.getBoundingClientRect();
-      return { id: second.dataset.homeId, x: Math.round(nowFirst.left), expected: Math.round(a.left) };
+      return { id: second.dataset.homeId!, expected: Math.round(a.left) };
     });
-    expect(moved.x).toBe(moved.expected);
+    // Wait for the icon to settle into its new slot (it animates there).
+    await expect
+      .poll(() => page.evaluate((id) => Math.round(document.querySelector(`[data-home-id="${id}"]`)!.getBoundingClientRect().left), moved.id))
+      .toBe(moved.expected);
   });
 });
