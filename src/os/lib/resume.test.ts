@@ -58,9 +58,17 @@ describe("buildResume", () => {
     expect(new Set(r.skills.map((s) => s.toLowerCase())).size).toBe(r.skills.length);
   });
 
-  it("only reports GitHub stats when there were contributions", () => {
+  it("only reports GitHub stats once there is a real habit", () => {
     expect(buildResume(content({ contributions: [] })).github).toBeUndefined();
-    const r = buildResume(content({ contributions: [{ date: "2026-01-01", count: 3, level: 1 }, { date: "2026-01-02", count: 2, level: 1 }] }));
-    expect(r.github).toEqual({ total: 5, activeDays: 2, longest: 2 });
+    const days = (n: number) => Array.from({ length: n }, (_, i) => ({ date: `2026-01-${String(i + 1).padStart(2, "0")}`, count: 2, level: 1 as const }));
+    expect(buildResume(content({ contributions: days(5) })).github).toBeUndefined();
+    expect(buildResume(content({ contributions: days(25) })).github).toEqual({ total: 50, activeDays: 25, longest: 25 });
+  });
+
+  it("drops bio paragraphs that only make sense inside the OS", () => {
+    const r = buildResume(
+      content({ profile: { ...fallbackContent.profile, bio: ["I like compilers.", "Every folder on the desktop is a project.", "Try the terminal."] } }),
+    );
+    expect(r.about).toEqual(["I like compilers."]);
   });
 });

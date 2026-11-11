@@ -52,6 +52,16 @@ export interface Resume {
   cvUrl?: string;
 }
 
+/** Below this many active days a year, a contribution count undersells rather than sells. */
+export const ACTIVITY_MIN_DAYS = 20;
+
+/**
+ * Bio paragraphs that talk about the OS itself ("every folder on the desktop…", "try the
+ * terminal") make no sense outside it, so the recruiter view and PDF leave them out.
+ */
+const OS_ONLY = /\b(desktop|terminal|folders?|start menu|mail app|double-click|this portfolio|operating system|runs in your browser)\b/i;
+export const outsideOs = (paragraphs: string[]) => paragraphs.filter((p) => !OS_ONLY.test(p));
+
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** "2025-09" / "2025-09-14" → "Sep 2025"; "2025" → "2025"; anything else passes through. */
@@ -151,13 +161,13 @@ export function buildResume(content: OSContent, siteUrl = ""): Resume {
     location: profile.location,
     available: !!profile.available,
     summary: profile.shortBio,
-    about: profile.bio,
+    about: outsideOs(profile.bio),
     links,
     skills,
     experience,
     projects,
     education,
-    github: stats && stats.total > 0 ? { total: stats.total, activeDays: stats.activeDays, longest: stats.longest } : undefined,
+    github: stats && stats.activeDays >= ACTIVITY_MIN_DAYS ? { total: stats.total, activeDays: stats.activeDays, longest: stats.longest } : undefined,
     cvUrl: profile.cvUrl,
   };
 }
