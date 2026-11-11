@@ -4,6 +4,8 @@ import { Globe, GraduationCap, Mail, MapPin, ScrollText } from "lucide-react";
 import { Avatar } from "../components/Avatar";
 import { MoonHeatmap } from "../components/MoonHeatmap";
 import { range } from "../lib/pins";
+import { contributionStats } from "../lib/github";
+import { ACTIVITY_MIN_DAYS } from "../lib/resume";
 import { useContent } from "../content/ContentProvider";
 import { openApp } from "./launch";
 import type { AppProps } from "./types";
@@ -15,7 +17,7 @@ export function About(_props: AppProps) {
   const { profile, experiences, contributions } = useContent();
   return (
     <Scroll>
-      <div className="grid gap-0 sm:grid-cols-[240px_1fr]">
+      <div className="grid grid-cols-1 gap-0 sm:grid-cols-[240px_minmax(0,1fr)]">
         <aside className="flex flex-col items-center gap-3 border-b border-line bg-surface-2 p-6 text-center sm:border-r sm:border-b-0">
           <div className="relative">
             <div className="absolute -inset-3 rounded-full bg-accent/15 blur-xl" aria-hidden />
@@ -73,7 +75,8 @@ export function About(_props: AppProps) {
             </section>
           )}
 
-          {contributions.length > 0 && (
+          {/* Only worth showing once there is a real habit to show. */}
+          {contributionStats(contributions).activeDays >= ACTIVITY_MIN_DAYS && (
             <section>
               <SectionTitle>Coding activity</SectionTitle>
               <button type="button" onClick={() => openApp("activity")} className="scroll-area block max-w-full overflow-x-auto rounded-xl border border-line bg-surface-2 p-3 text-left transition-colors hover:border-accent/50">
