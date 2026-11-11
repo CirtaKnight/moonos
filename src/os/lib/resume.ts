@@ -37,6 +37,7 @@ export interface ResumeProject {
 export interface Resume {
   name: string;
   title: string;
+  avatarUrl?: string;
   location?: string;
   available: boolean;
   summary: string;
@@ -146,6 +147,7 @@ export function buildResume(content: OSContent, siteUrl = ""): Resume {
   return {
     name: profile.name,
     title: profile.title,
+    avatarUrl: profile.avatarUrl,
     location: profile.location,
     available: !!profile.available,
     summary: profile.shortBio,
