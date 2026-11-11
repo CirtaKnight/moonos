@@ -142,7 +142,7 @@ export function MapApp(_props: AppProps) {
       {/* Sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-surface-2 sm:flex">
         <div className="flex flex-wrap gap-1.5 border-b border-line p-3">
-          {(["all", "project", "experience", "event"] as const).map((k) => (
+          {(["all", "project", "experience", "event"] as const).filter((k) => k === "all" || pins.some((p) => p.kind === k)).map((k) => (
             <button
               key={k}
               type="button"

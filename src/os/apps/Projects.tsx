@@ -28,7 +28,8 @@ export function Projects(_props: AppProps) {
           <FilterChip active={!tag} onClick={() => setTag(null)}>
             All · {projects.length}
           </FilterChip>
-          {tags.map((t) => (
+          {/* Tag filters only help once there is something to filter. */}
+          {projects.length >= 4 && tags.map((t) => (
             <FilterChip key={t} active={tag === t} onClick={() => setTag(t)}>
               {t}
             </FilterChip>
