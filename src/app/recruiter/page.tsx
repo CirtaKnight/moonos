@@ -7,6 +7,7 @@ import { MoonHeatmap } from "@/os/components/MoonHeatmap";
 import { SocialIcon } from "@/os/components/SocialIcon";
 import { getOSContent } from "@/os/content/getContent";
 import { buildResume, RESUME_PDF_PATH, type ResumeEntry } from "@/os/lib/resume";
+import { RecruiterContact } from "./RecruiterContact";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { profile } = await getOSContent();
@@ -27,6 +28,8 @@ export default async function RecruiterPage() {
   const content = await getOSContent();
   const r = buildResume(content, SITE);
   const email = r.links.find((l) => l.label === "Email");
+  // Where a recruiter can still reach out if the form can't deliver: email, then LinkedIn, then anything.
+  const fallback = email ?? r.links.find((l) => /linkedin/i.test(l.label)) ?? r.links.find((l) => l.label !== "Portfolio");
 
   return (
     <div className="recruiter selectable fixed inset-0 overflow-y-auto bg-bg text-fg">
@@ -47,7 +50,7 @@ export default async function RecruiterPage() {
             <a
               href={RESUME_PDF_PATH}
               download={`${r.name} - Resume.pdf`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3.5 py-1.5 text-sm font-medium text-accent-ink transition-colors hover:bg-[#d3ddf3]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-1.5 text-sm text-fg transition-colors hover:border-accent"
             >
               <Download size={14} /> One-page PDF
             </a>
@@ -76,8 +79,8 @@ export default async function RecruiterPage() {
             </p>
           </div>
           <a
-            href={email ? email.href : "/?open=app/mail"}
-            className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-medium text-fg transition-colors hover:bg-accent/20 sm:self-center"
+            href={email ? email.href : "#contact"}
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-full bg-gold px-5 text-sm font-semibold text-[#1a1406] shadow-[0_6px_16px_-6px_rgb(200_169_111/0.6)] transition-colors hover:bg-[#dcc08a] sm:self-center"
           >
             <Mail size={16} /> Get in touch
           </a>
@@ -205,10 +208,31 @@ export default async function RecruiterPage() {
           </aside>
         </div>
 
-        <footer className="mt-16 flex flex-col items-start justify-between gap-3 border-t border-line pt-6 text-sm text-faint sm:flex-row sm:items-center">
-          <p>This page and the PDF are generated from the same content as MoonOS, so they are always up to date.</p>
+        <section id="contact" className="mt-16 scroll-mt-24 rounded-3xl border border-line bg-surface-2 p-6 sm:p-8">
+          <h2 className="font-display text-2xl tracking-[0.04em] text-fg">Let&apos;s talk</h2>
+          <p className="mt-2 max-w-prose text-muted">
+            {r.available ? `${r.name} is open to internships and junior roles.` : `${r.name} is always happy to hear about interesting work.`}{" "}
+            {email ? (
+              <>
+                Write to{" "}
+                <a href={email.href} className="text-accent underline underline-offset-4">
+                  {email.display}
+                </a>{" "}
+                or leave a message here.
+              </>
+            ) : (
+              "Leave a message here and it lands straight in their inbox."
+            )}
+          </p>
+          <div className="mt-6">
+            <RecruiterContact name={r.name} fallbackHref={fallback?.href} />
+          </div>
+        </section>
+
+        <footer className="mt-10 flex flex-col items-start justify-between gap-3 text-sm text-faint sm:flex-row sm:items-center">
+          <p>Kept in sync with the portfolio, so this page and the PDF are always current.</p>
           <Link href="/" className="text-muted hover:text-fg">
-            Boot the full experience →
+            Explore MoonOS, the portfolio as an operating system →
           </Link>
         </footer>
       </main>
