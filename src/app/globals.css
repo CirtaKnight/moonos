@@ -16,7 +16,7 @@
   --border-strong: rgb(214 222 238 / 0.22);
   --text: #e9ecf3;
   --text-muted: #8c94a8;
-  --text-faint: #5c6478;
+  --text-faint: #777f94; /* ≥4.5:1 on bg and cards */
   --accent: #bccbeb;
   --accent-strong: #8ea7dc;
   --accent-ink: #0a0f1c;

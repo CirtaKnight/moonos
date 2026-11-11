@@ -125,11 +125,11 @@ export function Boot({
               const isCurrent = i === lineIndex;
               return (
                 <div key={i} className="flex gap-3 whitespace-pre-wrap break-words">
-                  <span className="shrink-0 text-[#4b5366]">
+                  <span className="shrink-0 text-[#737b90]">
                     [{(i * 0.137 + 0.004).toFixed(6).padStart(10, " ")}]
                   </span>
                   <StatusTag status={line.status} visible={!isCurrent || charIndex >= line.text.length} />
-                  <span className={line.status === "dim" ? "text-[#6b7387]" : undefined}>
+                  <span className={line.status === "dim" ? "text-[#7d859a]" : undefined}>
                     {typed}
                     {isCurrent && <span className="caret ml-px inline-block h-[1.1em] w-[0.55em] translate-y-[0.2em] bg-[#c9cfdc]" />}
                   </span>
@@ -165,12 +165,12 @@ export function Boot({
         <a
           href={recruiterHref}
           data-quick-view
-          className="absolute bottom-4 left-4 rounded-full border border-[#2a3246] px-3.5 py-1.5 font-mono text-[11px] text-[#bccbeb] transition-colors hover:border-[#bccbeb] hover:bg-[#bccbeb]/10 sm:bottom-6 sm:left-8"
+          className="absolute bottom-4 left-4 rounded-full border border-[#c8a96f]/60 bg-[#c8a96f]/10 px-4 py-2 text-[13px] font-medium text-[#f1e3c4] transition-colors hover:border-[#c8a96f] hover:bg-[#c8a96f]/20 sm:bottom-6 sm:left-8"
         >
           Recruiter? One-page view →
         </a>
       )}
-      <p className="pointer-events-none absolute right-4 bottom-5 font-mono text-[10px] tracking-widest text-[#4b5366] uppercase sm:right-8 sm:bottom-7">
+      <p className="pointer-events-none absolute right-4 bottom-6 font-mono text-[11px] tracking-widest text-[#737b90] uppercase sm:right-8 sm:bottom-8">
         <span className="hidden sm:inline">Press any key to skip</span>
         <span className="sm:hidden">Tap to skip</span>
       </p>
