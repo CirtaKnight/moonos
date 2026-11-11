@@ -79,13 +79,19 @@ export const useSettings = create<SettingsState>()(
     {
       // Keep in sync with the motion init script in app/layout.tsx.
       name: "ck-os-settings",
-      version: 3,
+      version: 4,
       // v1 → v2 (MoonOS): new fields get defaults; everyone gets the new animated wallpaper once.
       // v2 → v3: the Day theme was removed, so the stored `theme` is dropped.
+      // v3 → v4: project folders moved to the top-right by default, so old icon layouts are reset.
       migrate: (persisted, version) => {
         const { theme: _drop, ...old } = (persisted ?? {}) as Partial<SettingsData> & { theme?: string };
         void _drop;
-        return { ...DEFAULTS, ...old, ...(version < 2 ? { wallpaper: "starfield" } : {}) };
+        return {
+          ...DEFAULTS,
+          ...old,
+          ...(version < 2 ? { wallpaper: "starfield" } : {}),
+          ...(version < 4 ? { iconLayout: {} } : {}),
+        };
       },
       partialize: (s): SettingsData => ({
         layout: s.layout,
