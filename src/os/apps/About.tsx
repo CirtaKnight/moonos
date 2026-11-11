@@ -2,6 +2,8 @@
 
 import { Globe, GraduationCap, Mail, MapPin, ScrollText } from "lucide-react";
 import { Avatar } from "../components/Avatar";
+import { MoonHeatmap } from "../components/MoonHeatmap";
+import { range } from "../lib/pins";
 import { useContent } from "../content/ContentProvider";
 import { openApp } from "./launch";
 import type { AppProps } from "./types";
@@ -10,7 +12,7 @@ import { Button, Scroll, SectionTitle, Tag } from "./ui";
 /** "About me" — opened from the profile card in the start menu. */
 export function About(_props: AppProps) {
   void _props;
-  const { profile } = useContent();
+  const { profile, experiences, contributions } = useContent();
   return (
     <Scroll>
       <div className="grid gap-0 sm:grid-cols-[240px_1fr]">
@@ -52,6 +54,34 @@ export function About(_props: AppProps) {
               ))}
             </div>
           </section>
+
+          {experiences.length > 0 && (
+            <section>
+              <SectionTitle>Experience</SectionTitle>
+              <ol className="flex flex-col gap-3 border-l border-line pl-4">
+                {experiences.map((x) => (
+                  <li key={x.id} className="relative">
+                    <span className="absolute top-1 -left-[21px] size-2.5 rounded-full bg-gold ring-4 ring-bg" />
+                    <p className="text-sm font-medium text-fg">
+                      {x.role} <span className="text-muted">· {x.organization}</span>
+                    </p>
+                    <p className="text-xs text-muted">{[range(x.start, x.end, true), x.place?.name].filter(Boolean).join(" · ")}</p>
+                    {x.description && <p className="mt-1 text-[13px] text-fg/85">{x.description}</p>}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
+          {contributions.length > 0 && (
+            <section>
+              <SectionTitle>Coding activity</SectionTitle>
+              <button type="button" onClick={() => openApp("activity")} className="scroll-area block max-w-full overflow-x-auto rounded-xl border border-line bg-surface-2 p-3 text-left transition-colors hover:border-accent/50">
+                <MoonHeatmap days={contributions} weeks={26} cell={10} showMonths={false} />
+                <span className="mt-2 block text-[11px] text-muted">Last 6 months on GitHub · open Activity for the full year</span>
+              </button>
+            </section>
+          )}
 
           {profile.skills.length > 0 && (
             <section>

@@ -188,6 +188,18 @@ export const SkillsGlyph = glyph(
   </>,
 );
 
+/** Activity: a row of waxing moons, the last one full and gold. */
+export const ActivityGlyph = glyph(
+  "activity",
+  <>
+    <circle cx="5" cy="12" r="2.6" strokeOpacity=".55" />
+    <circle cx="12" cy="12" r="2.6" />
+    <path d="M12 9.4a2.6 2.6 0 0 1 0 5.2Z" fill="currentColor" stroke="none" />
+    <circle cx="19" cy="12" r="2.6" fill={GOLD} stroke={GOLD} />
+    <path d="M3 18.5h18" strokeOpacity=".4" />
+  </>,
+);
+
 /* --------------------------------------- System --------------------------------------- */
 
 /** Terminal: a prompt chevron and a gold caret. */

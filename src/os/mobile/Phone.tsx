@@ -23,7 +23,7 @@ import { useDeepLinks } from "../useDeepLinks";
 import { useSkyAchievements } from "../useSkyAchievements";
 
 const DOCK: AppId[] = ["projects", "terminal", "browser", "mail"];
-const GRID_APPS: AppId[] = ["konshu", "games", "agenda", "map", "skills", "cv", "gallery", "videos", "music", "trophies", "settings", "bin"];
+const GRID_APPS: AppId[] = ["konshu", "games", "agenda", "map", "skills", "activity", "cv", "gallery", "videos", "music", "trophies", "settings", "bin"];
 const STATUS_H = 34;
 const DOCK_H = 96;
 const ROW_H = 96;

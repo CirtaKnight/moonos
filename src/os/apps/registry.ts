@@ -1,5 +1,6 @@
 import {
   AboutGlyph,
+  ActivityGlyph,
   AgendaGlyph,
   BinGlyph,
   BrowserGlyph,
@@ -26,6 +27,7 @@ import {
   ViewerGlyph,
 } from "../components/AppGlyphs";
 import { About } from "./About";
+import { Activity } from "./Activity";
 import { Agenda } from "./Agenda";
 import { Browser } from "./Browser";
 import { CV } from "./CV";
@@ -79,6 +81,7 @@ export const APP_IDS = [
   "map",
   "konshu",
   "skills",
+  "activity",
 ] as const;
 export type AppId = (typeof APP_IDS)[number];
 
@@ -114,6 +117,7 @@ export const apps: Record<AppId, AppDefinition> = {
   map: { id: "map", name: "Map", icon: MapGlyph, tint: WORK, component: MapApp, size: { w: 980, h: 620 }, listed: true, pinned: true, description: "Where I've built, studied and hacked" },
   konshu: { id: "konshu", name: "Konshu", icon: KonshuGlyph, tint: PLAY, component: Konshu, size: { w: 460, h: 600 }, listed: true, pinned: true, description: "Ask the guide anything" },
   skills: { id: "skills", name: "Skills", icon: SkillsGlyph, tint: WORK, component: Skills, size: { w: 900, h: 600 }, listed: true, pinned: false, description: "Skills constellation" },
+  activity: { id: "activity", name: "Activity", icon: ActivityGlyph, tint: WORK, component: Activity, size: { w: 860, h: 560 }, listed: true, pinned: false, description: "GitHub activity in moon phases" },
 };
 
 export function getApp(id: string): AppDefinition {
