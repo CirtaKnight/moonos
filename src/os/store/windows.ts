@@ -45,8 +45,23 @@ export interface Bounds {
   h: number;
 }
 
+/** A window as remembered between visits (no ids or z values: those are per session). */
+export interface SavedWindow {
+  appId: string;
+  key: string;
+  title: string;
+  params: WindowParams;
+  rect: Rect;
+  minimized: boolean;
+  maximized: boolean;
+  snap: Snap;
+  pinned?: boolean;
+}
+
 interface WindowsState {
   windows: WindowInstance[];
+  /** Last floating rectangle per window key and per app, so windows reopen where they were. */
+  memory: Record<string, Rect>;
   focusedId: string | null;
   bounds: Bounds;
   nextZ: number;
@@ -63,6 +78,9 @@ interface WindowsState {
   /** Click on a taskbar/dock entry: focus, restore, or minimize if already focused. */
   activate: (id: string) => void;
   togglePin: (id: string) => void;
+  setMemory: (memory: Record<string, Rect>) => void;
+  /** Reopen windows from a previous visit, bottom-most first; the last one gets focus. */
+  restore: (saved: SavedWindow[]) => void;
 }
 
 const MIN_W = 300;
@@ -100,6 +118,7 @@ function topmostVisible(windows: WindowInstance[], exclude?: string): string | n
 
 export const useWindows = create<WindowsState>()((set, get) => ({
   windows: [],
+  memory: {},
   focusedId: null,
   bounds: { x: 0, y: 0, w: 1280, h: 720 },
   nextZ: 1,
@@ -126,8 +145,10 @@ export const useWindows = create<WindowsState>()((set, get) => ({
     const w = Math.min(size?.w ?? 720, bounds.w - 32);
     const h = Math.min(size?.h ?? 480, bounds.h - 32);
     const step = (state.openCount % 8) * CASCADE;
+    // Reopen where this window (or, failing that, this app) was last left.
+    const remembered = state.memory[dedupeKey] ?? state.memory[appId];
     const rect = clampRect(
-      {
+      remembered ?? {
         x: bounds.x + Math.max(16, (bounds.w - w) / 2 - 3 * CASCADE + step),
         y: bounds.y + Math.max(12, (bounds.h - h) / 2 - 3 * CASCADE + step),
         w,
@@ -192,14 +213,42 @@ export const useWindows = create<WindowsState>()((set, get) => ({
     }),
 
   setRect: (id, partial) => {
-    const { bounds } = get();
+    const { bounds, windows, memory } = get();
+    const target = windows.find((w) => w.id === id);
+    if (!target) return;
+    const rect = clampRect({ ...target.rect, ...partial }, bounds);
     set({
-      windows: get().windows.map((w) =>
-        w.id === id
-          ? { ...w, rect: clampRect({ ...w.rect, ...partial }, bounds), maximized: false, snap: null }
-          : w,
-      ),
+      windows: windows.map((w) => (w.id === id ? { ...w, rect, maximized: false, snap: null } : w)),
+      memory: { ...memory, [target.key]: rect, [target.appId]: rect },
     });
+  },
+
+  setMemory: (memory) => set({ memory }),
+
+  restore: (saved) => {
+    const { bounds } = get();
+    let z = get().nextZ;
+    const existing = new Set(get().windows.map((w) => w.key));
+    const restored = saved
+      .filter((s) => !existing.has(s.key))
+      .map<WindowInstance>((s) => ({
+        id: newId(),
+        appId: s.appId,
+        key: s.key,
+        title: s.title,
+        params: s.params,
+        rect: clampRect(s.rect, bounds),
+        z: z++,
+        minimized: s.minimized,
+        maximized: s.maximized,
+        snap: s.snap,
+        pinned: s.pinned,
+      }));
+    if (!restored.length) return;
+    // Anything already open (e.g. from a deep link) stays on top of the restored windows.
+    const current = [...get().windows].sort((a, b) => a.z - b.z).map((w) => ({ ...w, z: z++ }));
+    const windows = [...restored, ...current];
+    set({ windows, nextZ: z, focusedId: topmostVisible(windows), openCount: get().openCount + restored.length });
   },
 
   snapTo: (id, snap) =>

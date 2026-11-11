@@ -4,7 +4,7 @@ import { clampRect, effectiveRect, useWindows } from "./windows";
 const bounds = { x: 0, y: 28, w: 1280, h: 620 };
 
 beforeEach(() => {
-  useWindows.setState({ windows: [], focusedId: null, nextZ: 1, openCount: 0, bounds });
+  useWindows.setState({ windows: [], memory: {}, focusedId: null, nextZ: 1, openCount: 0, bounds });
 });
 
 const s = () => useWindows.getState();
