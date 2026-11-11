@@ -13,7 +13,7 @@ import { AppIcon, FolderIcon } from "./AppIcon";
 import { FileThumb } from "./FileIcons";
 
 const searchableApps = (Object.keys(apps) as AppId[])
-  .filter((id) => apps[id].listed || id === "bin")
+  .filter((id) => apps[id].listed || id === "bin" || id === "music")
   .map((id) => ({ id, name: apps[id].name, description: apps[id].description }));
 
 const KIND_LABEL: Record<SearchHit["kind"], string> = { app: "App", project: "Project", file: "File" };

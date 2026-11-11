@@ -46,7 +46,7 @@ export function StartMenu() {
       exit={{ opacity: 0, y: 12, scale: 0.98, transition: { duration: 0.12 } }}
       transition={{ type: "spring", stiffness: 460, damping: 34 }}
       onClick={(e) => e.stopPropagation()}
-      className="glass absolute z-[70] flex w-[min(560px,calc(100vw-16px))] flex-col overflow-hidden rounded-2xl border border-line-strong shadow-window"
+      className="glass absolute z-[70] flex w-[min(660px,calc(100vw-16px))] flex-col overflow-hidden rounded-2xl border border-line-strong shadow-window"
       style={{ ...position, maxHeight: `calc(100dvh - ${MENUBAR_H + DOCK_RESERVED + 24}px)` }}
     >
       {/* Search */}
@@ -80,7 +80,7 @@ export function StartMenu() {
         </button>
 
         <h3 className="mt-5 mb-2 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">Apps</h3>
-        <ul className="grid grid-cols-4 gap-1 sm:grid-cols-6">
+        <ul className="grid grid-cols-4 gap-1 sm:grid-cols-8">
           {listed.map((id) => (
             <li key={id}>
               <button
