@@ -68,21 +68,23 @@ function Entry({ e, withSkills }: { e: ResumeEntry; withSkills?: boolean }) {
         {e.period ? <Text style={s.period}>{e.period}</Text> : null}
       </View>
       {e.place ? <Text style={s.small}>{e.place}</Text> : null}
-      {e.description ? <Text style={s.desc}>{clip(e.description, 230)}</Text> : null}
-      {withSkills && e.skills.length ? <Text style={s.small}>{e.skills.slice(0, 8).join(" · ")}</Text> : null}
+      {e.description ? <Text style={s.desc}>{clip(e.description, 200)}</Text> : null}
+      {withSkills && e.skills.length ? <Text style={s.small}>{e.skills.slice(0, 7).join(" · ")}</Text> : null}
     </View>
   );
 }
 
 export function ResumeDocument({ resume: r, siteUrl }: { resume: Resume; siteUrl?: string }) {
   const avatar = pdfAvatar(r.avatarUrl);
-  const experience = r.experience.slice(0, 4);
-  const projects = r.projects.slice(0, experience.length >= 3 ? 3 : 4);
-  const about = r.about.length ? clip(r.about.join(" "), experience.length ? 420 : 640) : "";
+  // Content budget: the one-pager must stay one page whatever the CMS holds.
+  const experience = r.experience.slice(0, 3);
+  const projects = r.projects.slice(0, experience.length >= 2 ? 3 : 4);
+  const about = r.about.length ? clip(r.about.join(" "), experience.length ? 320 : 600) : "";
 
   return (
     <Document title={`${r.name} — Résumé`} author={r.name} subject={r.title} creator="MoonOS" producer="MoonOS">
-      <Page size="A4" style={s.page}>
+      {/* wrap={false}: never spill onto a second page, even with pathological content. */}
+      <Page size="A4" style={s.page} wrap={false}>
         <View style={s.header}>
           {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
           {avatar ? <Image src={avatar} style={s.avatar} /> : null}
@@ -131,7 +133,7 @@ export function ResumeDocument({ resume: r, siteUrl }: { resume: Resume; siteUrl
                       </Link>
                       {p.date ? <Text style={s.period}>{p.date}</Text> : null}
                     </View>
-                    {p.summary ? <Text style={s.desc}>{clip(p.summary, 180)}</Text> : null}
+                    {p.summary ? <Text style={s.desc}>{clip(p.summary, 150)}</Text> : null}
                     {p.tags.length ? <Text style={s.small}>{p.tags.slice(0, 7).join(" · ")}</Text> : null}
                     {p.repoUrl ? (
                       <Link src={p.repoUrl} style={[s.small, s.link]}>
@@ -151,7 +153,7 @@ export function ResumeDocument({ resume: r, siteUrl }: { resume: Resume; siteUrl
               <View style={s.section}>
                 <Text style={s.h2}>Skills</Text>
                 <View style={s.chips}>
-                  {r.skills.slice(0, 26).map((k) => (
+                  {r.skills.slice(0, 24).map((k) => (
                     <Text key={k} style={s.chip}>
                       {k}
                     </Text>
@@ -176,7 +178,7 @@ export function ResumeDocument({ resume: r, siteUrl }: { resume: Resume; siteUrl
             {r.links.length > 0 && (
               <View style={s.section}>
                 <Text style={s.h2}>Links</Text>
-                {r.links.slice(0, 7).map((l) => (
+                {r.links.slice(0, 6).map((l) => (
                   <View key={l.href} style={s.sideLink}>
                     <Text style={s.sideLabel}>{l.label}</Text>
                     <Link src={l.href} style={s.link}>
