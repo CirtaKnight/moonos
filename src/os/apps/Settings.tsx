@@ -172,8 +172,18 @@ function SoundMotion() {
   const setCustomCursor = useSettings((s) => s.setCustomCursor);
   const saver = useSettings((s) => s.screensaverMinutes);
   const setSaver = useSettings((s) => s.setScreensaverMinutes);
+  const restoreWindows = useSettings((s) => s.restoreWindows);
+  const setRestoreWindows = useSettings((s) => s.setRestoreWindows);
   return (
     <>
+      <Group title="Windows">
+        <Toggle
+          label="Reopen windows from my last visit"
+          hint="Windows also remember where you moved and resized them."
+          checked={restoreWindows}
+          onChange={setRestoreWindows}
+        />
+      </Group>
       <Group title="Sound">
         <Toggle
           label="UI sounds"

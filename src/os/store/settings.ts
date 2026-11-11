@@ -24,6 +24,8 @@ export interface SettingsData {
   iconLayout: Record<string, IconCell>;
   /** Phone home screen slots the visitor arranged. */
   homeLayout: Record<string, number>;
+  /** Reopen last visit's windows on the desktop. */
+  restoreWindows: boolean;
 }
 
 export interface SettingsState extends SettingsData {
@@ -38,6 +40,7 @@ export interface SettingsState extends SettingsData {
   markNoticesSeen: (ids: string[]) => void;
   setIconLayout: (layout: Record<string, IconCell>) => void;
   setHomeLayout: (layout: Record<string, number>) => void;
+  setRestoreWindows: (on: boolean) => void;
 }
 
 function applyToDocument(reduceMotion: boolean) {
@@ -58,6 +61,7 @@ const DEFAULTS: SettingsData = {
   seenNotices: [],
   iconLayout: {},
   homeLayout: {},
+  restoreWindows: true,
 };
 
 const unique = (a: string[], b: string[]) => [...new Set([...a, ...b])].slice(-300);
@@ -80,6 +84,7 @@ export const useSettings = create<SettingsState>()(
       markNoticesSeen: (ids) => set({ seenNotices: unique(get().seenNotices, ids) }),
       setIconLayout: (iconLayout) => set({ iconLayout }),
       setHomeLayout: (homeLayout) => set({ homeLayout }),
+      setRestoreWindows: (restoreWindows) => set({ restoreWindows }),
     }),
     {
       // Keep in sync with the motion init script in app/layout.tsx.
@@ -111,6 +116,7 @@ export const useSettings = create<SettingsState>()(
         seenNotices: s.seenNotices,
         iconLayout: s.iconLayout,
         homeLayout: s.homeLayout,
+        restoreWindows: s.restoreWindows,
       }),
     },
   ),
