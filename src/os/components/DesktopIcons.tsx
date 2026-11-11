@@ -39,7 +39,11 @@ export function DesktopIcons() {
   const cols = Math.max(1, Math.floor((bounds.w - PAD * 2) / CELL_W));
   const idKey = entries.map((e) => e.id).join("|");
   const ids = useMemo(() => idKey.split("|"), [idKey]);
-  const layout = useMemo(() => placeIcons(ids, saved, rows), [ids, saved, rows]);
+  // Project folders live in the top-right corner by default; everything else fills from the left.
+  const layout = useMemo(
+    () => placeIcons(ids, saved, rows, { cols, right: ids.filter((id) => id.startsWith("project:")) }),
+    [ids, saved, rows, cols],
+  );
   const byId = useMemo(() => new Map(entries.map((e) => [e.id, e])), [entries]);
 
   const openSelection = (entry: DesktopEntry) => {
@@ -148,7 +152,7 @@ export function DesktopIcons() {
     el.addEventListener("pointercancel", up);
   }
 
-  const areaMenu = contextMenuProps(() => desktopMenu(content, entries, rows));
+  const areaMenu = contextMenuProps(() => desktopMenu(content, entries, rows, cols));
 
   return (
     <div

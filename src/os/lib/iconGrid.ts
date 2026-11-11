@@ -6,8 +6,10 @@ const key = (cell: Cell) => `${cell.c}:${cell.r}`;
 /**
  * Place icons on a column-major grid with `rows` rows. Saved positions win (if still on the
  * grid and not colliding); everything else fills the first free cells in default order.
+ * Ids listed in `right` fill from the top-right corner instead (rightmost column first),
+ * when `cols` is known.
  */
-export function placeIcons(ids: string[], saved: Layout, rows: number): Layout {
+export function placeIcons(ids: string[], saved: Layout, rows: number, opts: { cols?: number; right?: string[] } = {}): Layout {
   const out: Layout = {};
   const taken = new Set<string>();
   for (const id of ids) {
@@ -16,6 +18,19 @@ export function placeIcons(ids: string[], saved: Layout, rows: number): Layout {
       out[id] = cell;
       taken.add(key(cell));
     }
+  }
+  const right = new Set(opts.cols ? (opts.right ?? []) : []);
+  let rcursor = 0;
+  for (const id of ids) {
+    if (out[id] || !right.has(id)) continue;
+    let cell: Cell;
+    do {
+      cell = { c: opts.cols! - 1 - Math.floor(rcursor / rows), r: rcursor % rows };
+      rcursor++;
+    } while (taken.has(key(cell)) && cell.c >= 0);
+    if (cell.c < 0) continue; // No room on the right: falls back to the left fill below.
+    out[id] = cell;
+    taken.add(key(cell));
   }
   let cursor = 0;
   for (const id of ids) {

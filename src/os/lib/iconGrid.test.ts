@@ -13,6 +13,16 @@ describe("placeIcons", () => {
     expect(l.c).toEqual({ c: 1, r: 0 });
   });
 
+  it("anchors `right` ids to the top-right corner", () => {
+    const l = placeIcons(["a", "p1", "b", "p2", "p3"], {}, 2, { cols: 5, right: ["p1", "p2", "p3"] });
+    expect(l).toEqual({ a: { c: 0, r: 0 }, b: { c: 0, r: 1 }, p1: { c: 4, r: 0 }, p2: { c: 4, r: 1 }, p3: { c: 3, r: 0 } });
+  });
+
+  it("keeps saved cells for right-anchored ids", () => {
+    const l = placeIcons(["p1"], { p1: { c: 1, r: 1 } }, 2, { cols: 5, right: ["p1"] });
+    expect(l.p1).toEqual({ c: 1, r: 1 });
+  });
+
   it("drops saved cells that no longer fit or collide", () => {
     const l = placeIcons(["a", "b"], { a: { c: 0, r: 9 }, b: { c: 3, r: 0 } }, 4);
     expect(l.a).toEqual({ c: 0, r: 0 });

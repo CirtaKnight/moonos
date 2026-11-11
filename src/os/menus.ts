@@ -33,10 +33,13 @@ import { useSettings } from "./store/settings";
 import { useUI } from "./store/ui";
 import { useWindows, type WindowInstance } from "./store/windows";
 
-export function desktopMenu(content: OSContent, entries: DesktopEntry[], rows: number): MenuEntry[] {
+export function desktopMenu(content: OSContent, entries: DesktopEntry[], rows: number, cols?: number): MenuEntry[] {
   const s = useSettings.getState();
-  const sortBy = (by: "name" | "date" | "type") => () =>
-    s.setIconLayout(placeIcons(sortEntries(entries, by).map((e) => e.id), {}, rows));
+  // Sorting keeps project folders in their top-right corner, sorted among themselves.
+  const sortBy = (by: "name" | "date" | "type") => () => {
+    const ids = sortEntries(entries, by).map((e) => e.id);
+    s.setIconLayout(placeIcons(ids, {}, rows, { cols, right: ids.filter((id) => id.startsWith("project:")) }));
+  };
   return [
     { label: "Open Terminal", icon: SquareTerminal, shortcut: "Alt T", onSelect: () => openApp("terminal") },
     { label: "Search", icon: FolderOpen, shortcut: "Ctrl K", onSelect: () => useUI.getState().togglePanel("search") },
