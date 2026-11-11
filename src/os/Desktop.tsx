@@ -7,6 +7,7 @@ import { Cursor } from "./components/Cursor";
 import { KeyboardLayer } from "./components/Keyboard";
 import { useIdleScreensaver } from "./components/LockScreen";
 import { DesktopIcons } from "./components/DesktopIcons";
+import { KonshuCorner } from "./components/KonshuCorner";
 import { NotificationLayer, useStartupNotifications } from "./components/Notifications";
 import { Spotlight } from "./components/Spotlight";
 import { DOCK_RESERVED, Dock, MENUBAR_H, MenuBar, TASKBAR_H, Taskbar } from "./components/Shell";
@@ -116,6 +117,8 @@ export function Desktop() {
       ) : (
         <Taskbar />
       )}
+
+      <KonshuCorner bottom={layout === "dock" ? 18 : TASKBAR_H + 14} />
 
       <AnimatePresence>{panel === "start" && <StartMenu key="start" />}</AnimatePresence>
       <NotificationLayer />

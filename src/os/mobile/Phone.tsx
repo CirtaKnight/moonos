@@ -1,5 +1,7 @@
 "use client";
 
+import { KonshuCorner } from "../components/KonshuCorner";
+import { RecruiterButton } from "../components/RecruiterButton";
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import { BatteryFull, ChevronLeft, FolderOpen, Info, Link2, Search, Wifi } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -157,8 +159,8 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
         </button>
       </div>
 
-      {/* Search pill */}
-      <div className="flex shrink-0 justify-center pt-3 pb-1">
+      {/* Search + recruiter pills */}
+      <div className="flex shrink-0 items-center justify-center gap-2 pt-3 pb-1">
         <button
           type="button"
           onClick={() => togglePanel("search")}
@@ -166,6 +168,7 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
         >
           <Search size={13} /> Search
         </button>
+        <RecruiterButton size="sm" className="h-8" />
       </div>
 
       {/* Icon pages */}
@@ -206,6 +209,8 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
             />
           ))}
       </div>
+
+      {!dimmed && <KonshuCorner bottom={DOCK_H + 6} right={14} size={46} compact />}
 
       {/* Dock */}
       <div className="shrink-0 px-3 pb-[max(10px,env(safe-area-inset-bottom))]" style={{ height: DOCK_H }}>
