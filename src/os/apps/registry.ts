@@ -19,6 +19,7 @@ import {
   OrbitGlyph,
   ResumeGlyph,
   SettingsGlyph,
+  SkillsGlyph,
   TerminalGlyph,
   TrophiesGlyph,
   VideosGlyph,
@@ -30,6 +31,7 @@ import { Browser } from "./Browser";
 import { CV } from "./CV";
 import { Folder as FolderApp } from "./Folder";
 import { Info } from "./Info";
+import { Skills } from "./Skills";
 import { Konshu } from "./Konshu";
 import { MapApp } from "./MapApp";
 import { Gallery, Videos } from "./Media";
@@ -76,6 +78,7 @@ export const APP_IDS = [
   "orbit",
   "map",
   "konshu",
+  "skills",
 ] as const;
 export type AppId = (typeof APP_IDS)[number];
 
@@ -110,6 +113,7 @@ export const apps: Record<AppId, AppDefinition> = {
   orbit: { id: "orbit", name: "Orbit", icon: OrbitGlyph, tint: PLAY, component: Orbit, size: { w: 520, h: 600 }, listed: false, pinned: false, description: "One-tap arcade" },
   map: { id: "map", name: "Map", icon: MapGlyph, tint: WORK, component: MapApp, size: { w: 980, h: 620 }, listed: true, pinned: true, description: "Where I've built, studied and hacked" },
   konshu: { id: "konshu", name: "Konshu", icon: KonshuGlyph, tint: PLAY, component: Konshu, size: { w: 460, h: 600 }, listed: true, pinned: true, description: "Ask the guide anything" },
+  skills: { id: "skills", name: "Skills", icon: SkillsGlyph, tint: WORK, component: Skills, size: { w: 900, h: 600 }, listed: true, pinned: false, description: "Skills constellation" },
 };
 
 export function getApp(id: string): AppDefinition {

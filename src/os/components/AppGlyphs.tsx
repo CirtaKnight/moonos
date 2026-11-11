@@ -176,6 +176,18 @@ export const KonshuGlyph = glyph(
   </>,
 );
 
+/** Skills: a small constellation, one star in gold. */
+export const SkillsGlyph = glyph(
+  "skills",
+  <>
+    <path d="M5 17.5L9.5 9 15 12.5 19 5.5" strokeOpacity=".55" />
+    <circle cx="5" cy="17.5" r="1.6" fill="currentColor" />
+    <circle cx="9.5" cy="9" r="1.6" fill="currentColor" />
+    <circle cx="19" cy="5.5" r="1.6" fill="currentColor" />
+    {star(15, 12.5, 3)}
+  </>,
+);
+
 /* --------------------------------------- System --------------------------------------- */
 
 /** Terminal: a prompt chevron and a gold caret. */
