@@ -37,6 +37,9 @@ export function DesktopIcons() {
 
   const rows = Math.max(1, Math.floor((bounds.h - PAD * 2) / CELL_H));
   const cols = Math.max(1, Math.floor((bounds.w - PAD * 2) / CELL_W));
+  // Spread columns across the full width so the last column sits flush with the right edge
+  // (project folders live there).
+  const stepX = cols > 1 ? (bounds.w - PAD * 2 - ICON_W) / (cols - 1) : CELL_W;
   const idKey = entries.map((e) => e.id).join("|");
   const ids = useMemo(() => idKey.split("|"), [idKey]);
   // Project folders live in the top-right corner by default; everything else fills from the left.
@@ -73,7 +76,7 @@ export function DesktopIcons() {
 
   const iconRect = (id: string): Rect => {
     const c = layout[id];
-    return { x: PAD + c.c * CELL_W, y: PAD + c.r * CELL_H, w: ICON_W, h: ICON_H };
+    return { x: PAD + c.c * stepX, y: PAD + c.r * CELL_H, w: ICON_W, h: ICON_H };
   };
 
   /* ------------------------------- Box selection ------------------------------- */
@@ -128,7 +131,7 @@ export function DesktopIcons() {
       el.removeEventListener("pointercancel", up);
       if (dragging) {
         const r = iconRect(entry.id);
-        const target = cellAt(r.x + ev.clientX - start.x + ICON_W / 2 - PAD, r.y + ev.clientY - start.y + ICON_H / 2 - PAD, CELL_W, CELL_H, rows, cols);
+        const target = cellAt(r.x + ev.clientX - start.x + stepX / 2 - PAD, r.y + ev.clientY - start.y + ICON_H / 2 - PAD, stepX, CELL_H, rows, cols);
         const from = layout[entry.id];
         setIconLayout(
           group.length > 1
