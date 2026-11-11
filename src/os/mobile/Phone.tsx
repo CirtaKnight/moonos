@@ -95,6 +95,7 @@ function StatusBar() {
 }
 
 const COLS = 4;
+const KONSHU_STRIP = 54;
 const GRID_TOP = 12;
 const LONG_PRESS_MS = 450;
 const EDGE_PX = 28;
@@ -404,8 +405,8 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
         </div>
       )}
 
-      {/* Page dots */}
-      <div className="flex h-5 shrink-0 items-center justify-center gap-1.5">
+      {/* Page dots, in a strip tall enough for Konshu so he never covers an icon */}
+      <div className="flex shrink-0 items-center justify-center gap-1.5" style={{ height: KONSHU_STRIP }}>
         {pages > 1 &&
           Array.from({ length: pages }, (_, i) => (
             <button
@@ -419,7 +420,7 @@ function HomeScreen({ dimmed }: { dimmed: boolean }) {
           ))}
       </div>
 
-      {!dimmed && <KonshuCorner bottom={DOCK_H + dockPad + 6} right={14} size={46} compact />}
+      {!dimmed && <KonshuCorner bottom={DOCK_H + dockPad + (KONSHU_STRIP - 46) / 2} right={14} size={46} compact />}
 
       {/* Dock (lifted above the host badge when there is one) */}
       <div
