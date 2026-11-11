@@ -22,6 +22,8 @@ export interface SettingsData {
   seenNotices: string[];
   /** Desktop icon positions the visitor arranged (grid cells). */
   iconLayout: Record<string, IconCell>;
+  /** Phone home screen slots the visitor arranged. */
+  homeLayout: Record<string, number>;
 }
 
 export interface SettingsState extends SettingsData {
@@ -35,6 +37,7 @@ export interface SettingsState extends SettingsData {
   markProjectsSeen: (ids: string[]) => void;
   markNoticesSeen: (ids: string[]) => void;
   setIconLayout: (layout: Record<string, IconCell>) => void;
+  setHomeLayout: (layout: Record<string, number>) => void;
 }
 
 function applyToDocument(reduceMotion: boolean) {
@@ -54,6 +57,7 @@ const DEFAULTS: SettingsData = {
   seenProjects: [],
   seenNotices: [],
   iconLayout: {},
+  homeLayout: {},
 };
 
 const unique = (a: string[], b: string[]) => [...new Set([...a, ...b])].slice(-300);
@@ -75,6 +79,7 @@ export const useSettings = create<SettingsState>()(
       markProjectsSeen: (ids) => set({ seenProjects: unique(get().seenProjects, ids) }),
       markNoticesSeen: (ids) => set({ seenNotices: unique(get().seenNotices, ids) }),
       setIconLayout: (iconLayout) => set({ iconLayout }),
+      setHomeLayout: (homeLayout) => set({ homeLayout }),
     }),
     {
       // Keep in sync with the motion init script in app/layout.tsx.
@@ -104,6 +109,7 @@ export const useSettings = create<SettingsState>()(
         seenProjects: s.seenProjects,
         seenNotices: s.seenNotices,
         iconLayout: s.iconLayout,
+        homeLayout: s.homeLayout,
       }),
     },
   ),
