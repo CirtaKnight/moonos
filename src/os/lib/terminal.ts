@@ -107,7 +107,7 @@ export const promptPath = (cwd: string[]) => (cwd.length ? `~/${cwd.join("/")}` 
 
 /* ---------------------------------- Commands ---------------------------------- */
 
-const APPS = ["about", "projects", "browser", "gallery", "videos", "terminal", "mail", "music", "game", "settings", "bin", "cv", "games", "agenda", "trophies", "moonword", "keystroke", "memory", "orbit"];
+const APPS = ["about", "projects", "browser", "gallery", "videos", "terminal", "mail", "music", "game", "settings", "bin", "cv", "games", "agenda", "trophies", "moonword", "keystroke", "memory", "orbit", "map"];
 const APP_ALIASES: Record<string, string> = {
   resume: "cv",
   "résumé": "cv",

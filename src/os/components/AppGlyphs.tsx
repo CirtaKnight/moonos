@@ -156,6 +156,17 @@ export const ViewerGlyph = glyph(
   </>,
 );
 
+/** Map: a folded map with a gold pin. */
+export const MapGlyph = glyph(
+  "map",
+  <>
+    <path d="M3.5 6.5l5-2 7 2.5 5-2v13l-5 2-7-2.5-5 2Z" />
+    <path d="M8.5 4.5v13M15.5 7v13" strokeOpacity=".55" />
+    <path d="M15.5 6.2c0 2.3-2.6 4.9-2.6 4.9s-2.6-2.6-2.6-4.9a2.6 2.6 0 0 1 5.2 0Z" fill={GOLD} stroke={GOLD} strokeWidth="1" />
+    <circle cx="12.9" cy="6.2" r=".9" fill="#1a1406" stroke="none" />
+  </>,
+);
+
 /* --------------------------------------- System --------------------------------------- */
 
 /** Terminal: a prompt chevron and a gold caret. */

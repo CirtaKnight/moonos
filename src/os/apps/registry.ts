@@ -8,6 +8,7 @@ import {
   GalleryGlyph,
   GamesGlyph,
   InfoGlyph,
+  MapGlyph,
   KeystrokeGlyph,
   MailGlyph,
   MemoryGlyph,
@@ -28,6 +29,7 @@ import { Browser } from "./Browser";
 import { CV } from "./CV";
 import { Folder as FolderApp } from "./Folder";
 import { Info } from "./Info";
+import { MapApp } from "./MapApp";
 import { Gallery, Videos } from "./Media";
 import { Trophies } from "./Trophies";
 import { GamesHub } from "./games/GamesHub";
@@ -70,6 +72,7 @@ export const APP_IDS = [
   "keystroke",
   "memory",
   "orbit",
+  "map",
 ] as const;
 export type AppId = (typeof APP_IDS)[number];
 
@@ -102,6 +105,7 @@ export const apps: Record<AppId, AppDefinition> = {
   keystroke: { id: "keystroke", name: "Keystroke", icon: KeystrokeGlyph, tint: PLAY, component: Keystroke, size: { w: 760, h: 480 }, listed: false, pinned: false, description: "Code typing test" },
   memory: { id: "memory", name: "Phase memory", icon: MemoryGlyph, tint: PLAY, component: Memory, size: { w: 480, h: 600 }, listed: false, pinned: false, description: "Memory match" },
   orbit: { id: "orbit", name: "Orbit", icon: OrbitGlyph, tint: PLAY, component: Orbit, size: { w: 520, h: 600 }, listed: false, pinned: false, description: "One-tap arcade" },
+  map: { id: "map", name: "Map", icon: MapGlyph, tint: WORK, component: MapApp, size: { w: 980, h: 620 }, listed: true, pinned: true, description: "Where I've built, studied and hacked" },
 };
 
 export function getApp(id: string): AppDefinition {

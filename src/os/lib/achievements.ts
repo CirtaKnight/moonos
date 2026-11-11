@@ -19,6 +19,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "night-owl", title: "Night owl", description: "Visit between midnight and 5 a.m.", group: "secrets", secret: true },
   { id: "full-moon", title: "Lunatic", description: "Visit during a full moon.", group: "secrets", secret: true },
   { id: "konami", title: "Old school", description: "Enter the Konami code on the desktop.", group: "secrets", secret: true },
+  { id: "one-small-step", title: "One small step", description: "Zoom out of the Map until you can reach the moon.", group: "secrets", secret: true },
   { id: "inspector", title: "Inspector", description: "Try to inspect the moon.", group: "secrets", secret: true },
   { id: "terminal-regular", title: "Terminal regular", description: "Run 10 terminal commands.", group: "terminal" },
   { id: "hire-me", title: "Excellent decision", description: "Run `sudo hire-me`.", group: "terminal" },

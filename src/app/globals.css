@@ -148,3 +148,41 @@ textarea {
 :root[data-cursor="custom"] [contenteditable="true"] {
   cursor: text !important;
 }
+
+/* ---------------------------------- Map app ---------------------------------- */
+/* Deep space behind the globe: the map canvas is transparent outside the planet. */
+.moon-map {
+  background:
+    radial-gradient(1px 1px at 12% 18%, #fff 60%, transparent),
+    radial-gradient(1px 1px at 72% 12%, #fff 60%, transparent),
+    radial-gradient(1.4px 1.4px at 38% 72%, #e9ecf3 60%, transparent),
+    radial-gradient(1px 1px at 88% 64%, #fff 60%, transparent),
+    radial-gradient(1px 1px at 55% 40%, #cfd6e6 60%, transparent),
+    radial-gradient(1.2px 1.2px at 20% 88%, #fff 60%, transparent),
+    radial-gradient(120% 90% at 70% 10%, #0d1426, #04060c 70%);
+}
+.moon-pin {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--pin);
+  border: 2px solid #05070d;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--pin) 45%, transparent), 0 0 18px var(--pin);
+  transition: transform 150ms ease;
+}
+.moon-pin:hover,
+.moon-pin:focus-visible {
+  transform: scale(1.35);
+}
+.moon-map .maplibregl-ctrl.maplibregl-ctrl-attrib,
+.moon-map .maplibregl-ctrl.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: rgb(5 7 13 / 0.75);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.moon-map .maplibregl-ctrl-attrib a {
+  color: var(--text-muted);
+}
+.moon-map .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
+}

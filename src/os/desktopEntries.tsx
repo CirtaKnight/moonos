@@ -59,6 +59,7 @@ export function useDesktopEntries(): DesktopEntry[] {
     })),
     appEntry("games", "Games"),
     appEntry("agenda"),
+    appEntry("map"),
     appEntry("cv", "Résumé.pdf", "document"),
     appEntry("terminal"),
     appEntry("trophies"),
