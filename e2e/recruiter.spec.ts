@@ -29,3 +29,25 @@ test.describe("Recruiter mode", () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 });
+
+test.describe("Desktop shortcuts to recruiters and Konshu", () => {
+  test("the shell shows a recruiter button, Konshu pops in the corner, folders sit top-right", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await page.keyboard.press("Enter");
+    await expect(page.locator("[data-recruiter-button]").first()).toHaveAttribute("href", "/recruiter");
+
+    const konshu = page.locator("[data-konshu-corner]");
+    await expect(konshu).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText(/keeper of this sky/)).toBeVisible({ timeout: 8_000 });
+
+    if (!isMobile) {
+      const folder = (await page.locator('[data-icon="project:moonos"]').boundingBox())!;
+      const width = page.viewportSize()!.width;
+      expect(width - (folder.x + folder.width)).toBeLessThan(40);
+      expect(folder.y).toBeLessThan(120);
+    }
+
+    await konshu.click();
+    await expect(page.getByPlaceholder(/Ask/i)).toBeVisible();
+  });
+});
