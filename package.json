@@ -18,6 +18,7 @@
     "prebuild": "node scripts/copy-maplibre-worker.mjs"
   },
   "dependencies": {
+    "@react-pdf/renderer": "~4.9.0",
     "@sanity/image-url": "^2.1.1",
     "lucide-react": "^1.71.0",
     "maplibre-gl": "~6.16.0",
