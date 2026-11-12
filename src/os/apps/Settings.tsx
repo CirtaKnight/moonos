@@ -1,5 +1,7 @@
 "use client";
 
+import { enterFullscreen, exitFullscreen } from "../fullscreen";
+import { useShellLayout } from "../useShellLayout";
 import { Check, Info, Monitor, RotateCcw, Volume2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { LogoMark } from "../components/Logo";
@@ -99,7 +101,9 @@ function DesktopSection() {
   const { settings } = useContent();
   const wallpaper = useSettings((s) => s.wallpaper);
   const setWallpaper = useSettings((s) => s.setWallpaper);
-  const layout = useSettings((s) => s.layout);
+  // Until the visitor picks one, the layout follows the screen (taskbar on big screens, dock
+  // on tablets); the choice shown is the layout actually in use.
+  const layout = useShellLayout();
   const setLayout = useSettings((s) => s.setLayout);
   const layouts: { id: ShellLayout; label: string }[] = [
     { id: "dock", label: "Menu bar + dock" },
@@ -173,10 +177,23 @@ function SoundMotion() {
   const saver = useSettings((s) => s.screensaverMinutes);
   const setSaver = useSettings((s) => s.setScreensaverMinutes);
   const restoreWindows = useSettings((s) => s.restoreWindows);
+  const fullscreenPref = useSettings((s) => s.fullscreen);
+  const setFullscreenPref = useSettings((s) => s.setFullscreen);
   const setRestoreWindows = useSettings((s) => s.setRestoreWindows);
   return (
     <>
       <Group title="Windows">
+        <Toggle
+          label="Open in full screen"
+          hint="Hides the browser's bars on your first click or key press. Press Esc to leave it."
+          checked={fullscreenPref}
+          onChange={(on) => {
+            setFullscreenPref(on);
+            // This click is a user gesture, so the change can apply right away.
+            if (on) enterFullscreen();
+            else exitFullscreen();
+          }}
+        />
         <Toggle
           label="Reopen windows from my last visit"
           hint="Windows also remember where you moved and resized them."
