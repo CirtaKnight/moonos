@@ -1,5 +1,7 @@
 "use client";
 
+import { canPin, isPinned, pin, resetPinned, unpin } from "./dockApps";
+import { shellLayoutNow } from "./useShellLayout";
 import {
   ArrowDownAZ,
   CalendarClock,
@@ -15,6 +17,8 @@ import {
   PanelLeft,
   PanelRight,
   Pin,
+  PinOff,
+  RotateCcw,
   RefreshCw,
   Settings2,
   Shapes,
@@ -80,12 +84,23 @@ export function desktopMenu(content: OSContent, entries: DesktopEntry[], rows: n
   ];
 }
 
+/** "Pin to dock" / "Unpin from taskbar"…, for any app that can live in the dock. */
+export function pinEntries(appId: string): MenuEntry[] {
+  if (!canPin(appId)) return [];
+  const where = shellLayoutNow() === "taskbar" ? "taskbar" : "dock";
+  return isPinned(appId)
+    ? [{ label: `Unpin from ${where}`, icon: PinOff, onSelect: () => unpin(appId) }]
+    : [{ label: `Pin to ${where}`, icon: Pin, onSelect: () => pin(appId) }];
+}
+
 export function iconMenu(entry: DesktopEntry, selectedCount: number): MenuEntry[] {
+  const app = entry.info.app;
   return [
     { label: selectedCount > 1 ? `Open ${selectedCount} items` : "Open", icon: FolderOpen, shortcut: "Enter", onSelect: () => openSelected(entry) },
     ...(entry.link
       ? [{ label: "Copy link", icon: Link2, onSelect: () => void copyText(shareUrl(entry.link!)) } as MenuEntry]
       : []),
+    ...(app && selectedCount <= 1 ? pinEntries(app) : []),
     "separator",
     { label: "Get info", icon: Info, onSelect: () => openApp("info", entry.info, `${entry.label} — Info`, `info:${entry.id}`) },
   ];
@@ -123,6 +138,8 @@ export function dockMenu(appId: AppId): MenuEntry[] {
     ...(own.length ? (["separator"] as MenuEntry[]) : []),
     { label: own.length ? `Open ${apps[appId].name}` : "Open", icon: FolderOpen, onSelect: () => openApp(appId) },
     { label: "Get info", icon: Info, onSelect: () => openApp("info", { app: appId }, `${apps[appId].name} — Info`, `info:${appId}`) },
+    ...pinEntries(appId),
+    ...(useSettings.getState().pinnedApps ? [{ label: "Reset to default apps", icon: RotateCcw, onSelect: resetPinned } as MenuEntry] : []),
     ...(own.length
       ? (["separator", { label: own.length > 1 ? "Close all" : "Close", icon: X, danger: true, onSelect: () => own.forEach((w) => close(w.id)) }] as MenuEntry[])
       : []),

@@ -1,14 +1,16 @@
 "use client";
 
+import { pinEntries } from "../menus";
+import { contextMenuProps } from "../store/contextMenu";
+import { useShellLayout } from "../useShellLayout";
 import { motion } from "motion/react";
-import { ChevronRight, Keyboard, Lock, PanelsTopLeft, Power, RotateCcw, Search } from "lucide-react";
+import { ChevronRight, FolderOpen, Keyboard, Lock, PanelsTopLeft, Power, RotateCcw, Search } from "lucide-react";
 import { RECRUITER_PATH } from "../lib/resume";
 import { useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp, openProject } from "../apps/launch";
 import { useContent, useProjects } from "../content/ContentProvider";
 import { usePower } from "../store/power";
-import { useSettings } from "../store/settings";
 import { useUI } from "../store/ui";
 import { AppIcon, FolderIcon } from "./AppIcon";
 import { Avatar } from "./Avatar";
@@ -17,7 +19,7 @@ import { DOCK_RESERVED, MENUBAR_H, TASKBAR_H } from "./Shell";
 export function StartMenu() {
   const { profile } = useContent();
   const projects = useProjects();
-  const layout = useSettings((s) => s.layout);
+  const layout = useShellLayout();
   const closePanel = useUI((s) => s.closePanel);
   const togglePanel = useUI((s) => s.togglePanel);
   const { restart, shutdown, lock } = usePower.getState();
@@ -87,6 +89,10 @@ export function StartMenu() {
               <button
                 type="button"
                 onClick={() => launch(() => openApp(id))}
+                onContextMenu={contextMenuProps(() => [
+                  { label: "Open", icon: FolderOpen, onSelect: () => launch(() => openApp(id)) },
+                  ...pinEntries(id),
+                ]).onContextMenu}
                 className="flex w-full flex-col items-center gap-1.5 rounded-lg p-2 text-center transition-colors hover:bg-surface-hover"
               >
                 <AppIcon icon={apps[id].icon} tint={apps[id].tint} size={40} />
