@@ -23,7 +23,8 @@ test.describe("desktop", () => {
   test("boots to a desktop that never scrolls", async ({ page }) => {
     await boot(page);
     await expect(page.getByRole("list", { name: "Desktop" })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Dock" })).toBeVisible();
+    // 1280px wide with a mouse counts as a big screen: the taskbar is the default there.
+    await expect(page.getByRole("navigation", { name: "Taskbar" })).toBeVisible();
     await expectNoPageScroll(page);
   });
 

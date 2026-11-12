@@ -1,5 +1,6 @@
 "use client";
 
+import { useShellLayout } from "./useShellLayout";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import { ContextMenuLayer } from "./components/ContextMenu";
@@ -24,7 +25,7 @@ import { useWindowMemory } from "./useWindowMemory";
 import { useSkyAchievements } from "./useSkyAchievements";
 
 export function Desktop() {
-  const layout = useSettings((s) => s.layout);
+  const layout = useShellLayout();
   const hostBadge = useHostBadge();
   const customCursor = useSettings((s) => s.customCursor);
   const finePointer = useMediaQuery("(pointer: fine)");

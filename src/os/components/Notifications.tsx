@@ -1,5 +1,6 @@
 "use client";
 
+import { useShellLayout } from "../useShellLayout";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, BellOff, CalendarDays, Sparkles, Trophy, X } from "lucide-react";
 import { siGithub } from "simple-icons";
@@ -214,7 +215,7 @@ export function NotificationLayer() {
   const clear = useNotifications((s) => s.clear);
   const panel = useUI((s) => s.panel);
   const closePanel = useUI((s) => s.closePanel);
-  const layout = useSettings((s) => s.layout);
+  const layout = useShellLayout();
   const top = layout === "dock" ? MENUBAR_H + 10 : 10;
   const open = panel === "notifications";
 
