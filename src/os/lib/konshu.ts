@@ -197,9 +197,24 @@ const INTENTS: Intent[] = [
   },
 ];
 
+/**
+ * Open-ended questions ("why…", "what do you think…", or simply long ones) deserve a real
+ * answer, so they go to the remote model even when a keyword matches. The local match is
+ * still returned (not confident) and used if the remote model is unavailable.
+ */
+const OPEN_ENDED = /^(why|how come|what do you think|what is your opinion|what s your opinion|should|would|could|explain|compare|tell me something|describe|imagine)\b/;
+export function isOpenEnded(q: string) {
+  return OPEN_ENDED.test(q) || q.split(" ").filter(Boolean).length > 8;
+}
+
 export function localAnswer(question: string, content: OSContent, now = new Date()): KonshuReply {
   const q = norm(question);
   if (!q) return { text: "Ask me anything about this site.", actions: [], confident: true };
+  const reply = matchLocal(q, content, now);
+  return isOpenEnded(q) ? { ...reply, confident: false } : reply;
+}
+
+function matchLocal(q: string, content: OSContent, now: Date): KonshuReply {
 
   // Specific apps first ("what is moonword", "open the terminal").
   for (const g of Object.values(APP_GUIDES)) {

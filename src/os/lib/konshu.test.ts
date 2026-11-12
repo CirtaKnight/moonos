@@ -22,6 +22,16 @@ describe("Konshu local brain", () => {
     expect(ask("Can I see your résumé?").actions[0]).toMatchObject({ type: "app", app: "cv" });
   });
 
+  it("hands open-ended questions to the AI but keeps quick ones local", () => {
+    expect(ask("Show me your projects").confident).toBe(true);
+    expect(ask("How can I contact you?").confident).toBe(true);
+    const open = ask("Why would a junior developer build their portfolio as an operating system?");
+    expect(open.confident).toBe(false);
+    // Still a sensible fallback if the AI is unavailable.
+    expect(open.text).toMatch(/MoonOS/);
+    expect(ask("What do you think of the projects?").confident).toBe(false);
+  });
+
   it("sends recruiters in a hurry to the one-page view", () => {
     expect(ask("I'm a recruiter, give me a quick overview").actions[0]).toMatchObject({ type: "url", href: "/recruiter" });
     expect(ask("tl;dr?").actions[0]).toMatchObject({ type: "url", href: "/recruiter" });
