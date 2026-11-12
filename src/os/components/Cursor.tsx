@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { pointer, trackPointer } from "../lib/pointer";
 import { useSettings } from "../store/settings";
 
@@ -128,8 +129,10 @@ export function Cursor() {
     };
   }, [reduceMotion]);
 
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-[1000]">
+  // Rendered at the top of the page (not inside the desktop's layer) with the highest
+  // z-index, so nothing — previews, menus, overlays — can ever draw over the pointer.
+  return createPortal(
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[2147483647]">
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       <div
         ref={ringRef}
@@ -148,6 +151,7 @@ export function Cursor() {
           <circle cx="7.5" cy="12.5" r="1.1" fill="#c8a96f" />
         </svg>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
