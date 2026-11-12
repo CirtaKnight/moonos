@@ -1,18 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getOSContent } from "@/os/content/getContent";
 import type { OSContent } from "@/os/content/types";
+import { buildRequest, isModelError, parseAnswer, pickProvider, type ChatTurn } from "@/os/lib/llm";
 
 /**
- * Konshu's remote brain: Google Gemini (free tier), used only when the local brain in
- * src/os/lib/konshu.ts doesn't recognise a question. Answers strictly from site content.
- *
- * Env: KONSHU_GEMINI_API_KEY (required; a free key from Google AI Studio), KONSHU_GEMINI_MODEL
- * (optional). Deliberately not GEMINI_API_KEY: some hosts (e.g. Netlify's AI Gateway) inject
- * their own key under that name, which only works through their proxy and their billing.
+ * Konshu's remote brain, used only when the local brain in src/os/lib/konshu.ts doesn't
+ * recognise a question. Answers strictly from site content. Provider and env vars: see
+ * src/os/lib/llm.ts (Groq's free tier by default: KONSHU_GROQ_API_KEY).
  */
-const DEFAULT_MODEL = "gemini-2.5-flash";
-/** Rolling alias, tried if the pinned model name is ever retired. */
-const FALLBACK_MODEL = "gemini-flash-latest";
 const MAX_INPUT = 500;
 const MAX_HISTORY = 8;
 
@@ -72,26 +67,11 @@ KNOWLEDGE:
 ${knowledge(c)}`;
 }
 
-interface Msg {
-  role: "user" | "konshu";
-  text: string;
-}
-
-async function callGemini(model: string, key: string, system: string, history: Msg[]) {
-  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: history.map((m) => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.text }] })),
-      generationConfig: { temperature: 0.4, maxOutputTokens: 400 },
-    }),
-  });
-}
+type Msg = ChatTurn;
 
 export async function POST(req: NextRequest) {
-  const key = process.env.KONSHU_GEMINI_API_KEY;
-  if (!key) return NextResponse.json({ error: "Konshu's remote brain isn't configured yet." }, { status: 503 });
+  const provider = pickProvider(process.env);
+  if (!provider) return NextResponse.json({ error: "Konshu's remote brain isn't configured yet." }, { status: 503 });
 
   let body: { messages?: Msg[] };
   try {
@@ -118,17 +98,31 @@ export async function POST(req: NextRequest) {
 
   const content = await getOSContent();
   const system = systemPrompt(content);
-  const model = process.env.KONSHU_GEMINI_MODEL || DEFAULT_MODEL;
   try {
-    let res = await callGemini(model, key, system, history);
-    if (res.status === 404 && model !== FALLBACK_MODEL) res = await callGemini(FALLBACK_MODEL, key, system, history);
-    if (!res.ok) {
-      console.error("[konshu] Gemini error", res.status, (await res.text().catch(() => "")).slice(0, 300));
-      return NextResponse.json({ error: "My connection to the stars flickered. Try again in a moment." }, { status: 502 });
+    for (const model of provider.models) {
+      const { url, init } = buildRequest(provider, model, system, history);
+      const res = await fetch(url, init);
+      if (res.ok) {
+        const text = parseAnswer(provider, await res.json());
+        return NextResponse.json({
+          text: text || "I'm not sure about that one — the Mail app is the best way to ask directly. [[app:mail]]",
+          provider: provider.label,
+        });
+      }
+      const body = (await res.text().catch(() => "")).slice(0, 300);
+      if (isModelError(res.status, body)) {
+        console.warn(`[konshu] ${provider.label} model ${model} unavailable, trying the next one`);
+        continue;
+      }
+      console.error(`[konshu] ${provider.label} error`, res.status, body);
+      const busy = res.status === 429;
+      return NextResponse.json(
+        { error: busy ? "Too many stargazers at once. Ask again in a minute." : "My connection to the stars flickered. Try again in a moment." },
+        { status: busy ? 429 : 502 },
+      );
     }
-    const data = await res.json();
-    const text: string = (data?.candidates?.[0]?.content?.parts ?? []).map((p: { text?: string }) => p.text ?? "").join("").trim();
-    return NextResponse.json({ text: text || "I'm not sure about that one — the Mail app is the best way to ask directly. [[app:mail]]" });
+    console.error(`[konshu] no ${provider.label} model available`);
+    return NextResponse.json({ error: "My connection to the stars flickered. Try again in a moment." }, { status: 502 });
   } catch (err) {
     console.error("[konshu]", err);
     return NextResponse.json({ error: "My connection to the stars flickered. Try again in a moment." }, { status: 502 });
