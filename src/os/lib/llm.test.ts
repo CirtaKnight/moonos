@@ -8,6 +8,10 @@ describe("pickProvider", () => {
     expect(pickProvider({ GEMINI_API_KEY: "host-injected" })).toBeNull();
   });
 
+  it("defaults to a model this kind of account offers, then backups", () => {
+    expect(pickProvider({ KONSHU_GROQ_API_KEY: "g" })!.models[0]).toBe("openai/gpt-oss-120b");
+  });
+
   it("puts a configured model first without duplicates", () => {
     const p = pickProvider({ KONSHU_GROQ_API_KEY: "g", KONSHU_GROQ_MODEL: "llama-3.1-8b-instant" })!;
     expect(p.models[0]).toBe("llama-3.1-8b-instant");
@@ -30,6 +34,13 @@ describe("requests and answers", () => {
     expect((init.headers as Record<string, string>).Authorization).toBe("Bearer secret");
     const body = JSON.parse(init.body as string);
     expect(body.messages.map((m: { role: string }) => m.role)).toEqual(["system", "user", "assistant", "user"]);
+    expect(body.reasoning_effort).toBeUndefined();
+  });
+
+  it("keeps reasoning models' thinking short", () => {
+    const body = (model: string) => JSON.parse(buildRequest(groq, model, "S", history).init.body as string);
+    expect(body("openai/gpt-oss-120b").reasoning_effort).toBe("low");
+    expect(body("qwen/qwen3.8-27b").reasoning_format).toBe("hidden");
   });
 
   it("builds a Gemini request with a system instruction", () => {

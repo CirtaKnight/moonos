@@ -22,7 +22,15 @@ export interface Provider {
   models: string[];
 }
 
-const GROQ_MODELS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "llama-3.1-8b-instant"];
+// Availability differs per Groq account; the route moves on when a model isn't offered.
+const GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "llama-3.3-70b-versatile"];
+
+/** Reasoning models think before answering; keep that short so it doesn't eat the answer's budget. */
+function reasoningOptions(model: string): Record<string, string> {
+  if (model.startsWith("openai/gpt-oss")) return { reasoning_effort: "low" };
+  if (model.startsWith("qwen/")) return { reasoning_format: "hidden" };
+  return {};
+}
 const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-flash-latest"];
 
 const unique = (xs: (string | undefined)[]) => [...new Set(xs.filter((x): x is string => !!x))];
@@ -51,6 +59,7 @@ export function buildRequest(provider: Provider, model: string, system: string, 
           model,
           temperature: TEMPERATURE,
           max_tokens: MAX_TOKENS,
+          ...reasoningOptions(model),
           messages: [
             { role: "system", content: system },
             ...history.map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: m.text })),
