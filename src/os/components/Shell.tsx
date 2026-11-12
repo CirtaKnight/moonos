@@ -1,9 +1,10 @@
 "use client";
 
+import { movePinned, usePinnedApps } from "../dockApps";
 import { HOST_BADGE, useHostBadge } from "../hooks";
 import { RecruiterButton } from "./RecruiterButton";
 import { motion } from "motion/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apps, type AppId } from "../apps/registry";
 import { openApp } from "../apps/launch";
 import { dockMenu } from "../menus";
@@ -18,23 +19,86 @@ import { Clock, MoonIndicator, TrayActions } from "./Tray";
 
 export const MENUBAR_H = 32;
 export const DOCK_RESERVED = 84;
-export const TASKBAR_H = 52;
+export const TASKBAR_H = 60;
 
 interface ShellEntry {
   appId: AppId;
   windows: WindowInstance[];
 }
 
-/** Pinned apps first, then any other running app, in launch order. */
-function useShellEntries(): ShellEntry[] {
+/** Pinned apps first (in the visitor's order), then any other running app, in launch order. */
+function useShellEntries(): (ShellEntry & { pinned: boolean })[] {
   const windows = useWindows((s) => s.windows);
-  const pinned = (Object.keys(apps) as AppId[]).filter((id) => apps[id].pinned);
-  const running = [...new Set(windows.map((w) => w.appId as AppId))].filter((id) => !pinned.includes(id));
+  const pinned = usePinnedApps();
+  const running = [...new Set(windows.map((w) => w.appId as AppId))].filter((id) => !pinned.includes(id) && id !== "bin");
   return [...pinned, ...running].map((appId) => ({
     appId,
+    pinned: pinned.includes(appId),
     windows: windows.filter((w) => w.appId === appId),
   }));
 }
+
+/**
+ * Drag pinned apps sideways to reorder them (dock and taskbar). The item hops to its new
+ * slot as soon as the pointer passes a neighbour's centre; a drag never counts as a click.
+ */
+function useDockReorder() {
+  const drag = useRef<{ id: AppId; startX: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const [dragging, setDragging] = useState<AppId | null>(null);
+
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      const d = drag.current;
+      if (!d) return;
+      if (!d.moved) {
+        if (Math.abs(e.clientX - d.startX) < 6) return;
+        d.moved = true;
+        setDragging(d.id);
+      }
+      const items = [...document.querySelectorAll<HTMLElement>("[data-dock-pinned]")];
+      const from = items.findIndex((el) => el.dataset.dockPinned === d.id);
+      for (let i = 0; i < items.length; i++) {
+        if (i === from) continue;
+        const r = items[i].getBoundingClientRect();
+        const centre = r.left + r.width / 2;
+        if ((i > from && e.clientX > centre && e.clientX < r.right) || (i < from && e.clientX < centre && e.clientX > r.left)) {
+          movePinned(d.id, i);
+          break;
+        }
+      }
+    };
+    const up = () => {
+      if (drag.current?.moved) suppressClick.current = true;
+      drag.current = null;
+      setDragging(null);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    };
+  }, []);
+
+  return {
+    dragging,
+    start: (id: AppId, e: React.PointerEvent) => {
+      if (e.button !== 0) return;
+      suppressClick.current = false;
+      drag.current = { id, startX: e.clientX, moved: false };
+    },
+    /** True (once) right after a drag, so the click that ends it doesn't open the app. */
+    consumeDrag: () => {
+      const was = suppressClick.current;
+      suppressClick.current = false;
+      return was;
+    },
+  };
+}
+type DockReorder = ReturnType<typeof useDockReorder>;
 
 function activateEntry(entry: ShellEntry) {
   const { windows, focusedId, activate } = useWindows.getState();
@@ -57,7 +121,7 @@ const LogoGlyph: Glyph = ({ size = 24 }) => <LogoMark variant="glyph" size={size
 const LAUNCHER_GLOW = "#8ea7dc";
 
 /**
- * Start button. `tile` (taskbar): the same 40px button and 28px tile as the app entries, so
+ * Start button. `tile` (taskbar): the same 48px button and 34px tile as the app entries, so
  * it reads as "the first app, but special". `bare` (menu bar): just the solid mark.
  */
 function StartButton({ variant }: { variant: "tile" | "bare" }) {
@@ -75,10 +139,10 @@ function StartButton({ variant }: { variant: "tile" | "bare" }) {
         togglePanel("start");
       }}
       className={`grid shrink-0 place-items-center rounded-md transition-colors hover:bg-surface-hover ${
-        variant === "tile" ? "size-10" : "h-7 w-8"
+        variant === "tile" ? "size-12" : "h-7 w-8"
       } ${open ? "bg-surface-hover" : ""}`}
     >
-      {variant === "tile" ? <AppIcon icon={LogoGlyph} tint={LAUNCHER_GLOW} size={28} /> : <LogoMark variant="glyph" size={17} />}
+      {variant === "tile" ? <AppIcon icon={LogoGlyph} tint={LAUNCHER_GLOW} size={34} /> : <LogoMark variant="glyph" size={17} />}
     </button>
   );
 }
@@ -114,6 +178,7 @@ export function Dock() {
   const entries = useShellEntries();
   const focusedId = useWindows((s) => s.focusedId);
   const binOpen = useWindows((s) => s.windows.some((w) => w.appId === "bin"));
+  const reorder = useDockReorder();
   return (
     <nav aria-label="Dock" className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
       <div className="glass pointer-events-auto flex items-end gap-1.5 rounded-2xl border border-line px-2 py-1.5 shadow-window">
@@ -126,6 +191,7 @@ export function Dock() {
             running={entry.windows.length > 0}
             focused={entry.windows.some((w) => w.id === focusedId)}
             onClick={() => activateEntry(entry)}
+            reorder={entry.pinned ? reorder : undefined}
           />
         ))}
         <span className="mx-0.5 h-10 w-px self-center bg-line" />
@@ -178,19 +244,29 @@ function DockItem({
   running,
   focused,
   onClick,
+  reorder,
 }: {
   appId: AppId;
   running: boolean;
   focused: boolean;
   onClick: () => void;
+  /** Present for pinned apps, which can be dragged into a new order. */
+  reorder?: DockReorder;
 }) {
   const app = apps[appId];
   const [hover, setHover] = useState(false);
   const anchor = useRef<HTMLDivElement>(null);
   const preview = usePreviewHover(running);
   return (
-    <div ref={anchor} className="relative flex flex-col items-center" onMouseEnter={preview.enter} onMouseLeave={preview.leave}>
-      {hover && !preview.open && <DockLabel text={app.name} />}
+    <div
+      ref={anchor}
+      data-dock-pinned={reorder ? appId : undefined}
+      className={`relative flex flex-col items-center transition-opacity ${reorder?.dragging === appId ? "opacity-60" : ""}`}
+      onMouseEnter={preview.enter}
+      onMouseLeave={preview.leave}
+      onPointerDown={reorder ? (e) => reorder.start(appId, e) : undefined}
+    >
+      {hover && !preview.open && !reorder?.dragging && <DockLabel text={app.name} />}
       {preview.open && (
         <WindowPreviews appId={appId} anchor={anchor} onEnter={preview.enter} onLeave={preview.leave} onPicked={preview.close} />
       )}
@@ -209,6 +285,7 @@ function DockItem({
         onClick={(e) => {
           e.stopPropagation();
           preview.close();
+          if (reorder?.consumeDrag()) return;
           onClick();
         }}
       >
@@ -228,6 +305,7 @@ function DockItem({
 export function Taskbar() {
   const entries = useShellEntries();
   const focusedId = useWindows((s) => s.focusedId);
+  const reorder = useDockReorder();
   // Keep the tray clear of a host badge pinned to the bottom-right corner.
   const badge = useHostBadge();
   return (
@@ -236,10 +314,10 @@ export function Taskbar() {
       style={{ height: TASKBAR_H, paddingRight: badge ? HOST_BADGE.w : undefined }}
     >
       <StartButton variant="tile" />
-      <span className="mx-1.5 h-6 w-px shrink-0 bg-line" />
+      <span className="mx-1.5 h-7 w-px shrink-0 bg-line" />
       <nav aria-label="Taskbar" className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
         {entries.map((entry) => (
-          <TaskbarItem key={entry.appId} entry={entry} focusedId={focusedId} />
+          <TaskbarItem key={entry.appId} entry={entry} focusedId={focusedId} reorder={entry.pinned ? reorder : undefined} />
         ))}
       </nav>
       <div className="flex items-center gap-1">
@@ -255,7 +333,7 @@ export function Taskbar() {
   );
 }
 
-function TaskbarItem({ entry, focusedId }: { entry: ShellEntry; focusedId: string | null }) {
+function TaskbarItem({ entry, focusedId, reorder }: { entry: ShellEntry; focusedId: string | null; reorder?: DockReorder }) {
   const app = apps[entry.appId];
   const running = entry.windows.length > 0;
   const focused = entry.windows.some((w) => w.id === focusedId);
@@ -270,21 +348,24 @@ function TaskbarItem({ entry, focusedId }: { entry: ShellEntry; focusedId: strin
         // The preview replaces the native tooltip once the app has windows.
         title={running ? undefined : app.name}
         data-dock={entry.appId}
+        data-dock-pinned={reorder ? entry.appId : undefined}
+        onPointerDown={reorder ? (e) => reorder.start(entry.appId, e) : undefined}
         onMouseEnter={preview.enter}
         onMouseLeave={preview.leave}
         onContextMenu={contextMenuProps(() => dockMenu(entry.appId)).onContextMenu}
         onClick={(e) => {
           e.stopPropagation();
           preview.close();
+          if (reorder?.consumeDrag()) return;
           activateEntry(entry);
         }}
-        className={`relative flex h-10 shrink-0 items-center gap-2 rounded-md px-2 transition-colors hover:bg-surface-hover ${
+        className={`relative flex h-12 shrink-0 items-center gap-2 rounded-lg px-2 transition-[background-color,opacity] hover:bg-surface-hover ${
           focused ? "bg-surface-hover" : ""
-        }`}
+        } ${reorder?.dragging === entry.appId ? "opacity-60" : ""}`}
       >
-        <AppIcon icon={app.icon} tint={app.tint} size={28} />
+        <AppIcon icon={app.icon} tint={app.tint} size={34} />
         {running && (
-          <span className="hidden max-w-32 truncate text-xs text-fg lg:inline">
+          <span className="hidden max-w-36 truncate text-[13px] text-fg lg:inline">
             {entry.windows.length > 1 ? `${app.name} (${entry.windows.length})` : entry.windows[0].title}
           </span>
         )}
