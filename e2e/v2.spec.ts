@@ -227,3 +227,37 @@ test.describe("MoonOS v2 — window previews and memory", () => {
     }
   });
 });
+
+test.describe("MoonOS v2 — layout, fullscreen and pinned apps", () => {
+  test.skip(({ isMobile }) => isMobile, "desktop only");
+
+  test("taskbar on big screens, dock on tablet sizes, by default", async ({ page }) => {
+    // Fullscreen off for this test: a fullscreen browser window can't be resized.
+    await page.addInitScript(() => localStorage.setItem("ck-os-settings", JSON.stringify({ state: { fullscreen: false }, version: 5 })));
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await boot(page);
+    await expect(page.getByRole("navigation", { name: "Taskbar" })).toBeVisible();
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await expect(page.getByRole("navigation", { name: "Dock" })).toBeVisible();
+  });
+
+  test("goes fullscreen on the key press that skips the boot", async ({ page }) => {
+    await boot(page);
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true);
+    // Leaving fullscreen is respected: the next click doesn't force it back.
+    await page.evaluate(() => document.exitFullscreen());
+    await page.mouse.click(400, 300);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => !!document.fullscreenElement)).toBe(false);
+  });
+
+  test("pinned apps can be unpinned and pinned again from menus", async ({ page }) => {
+    await boot(page);
+    await page.locator('[data-dock="gallery"]').click({ button: "right" });
+    await page.getByRole("menuitem", { name: /Unpin from/ }).click();
+    await expect(page.locator('[data-dock="gallery"]')).toHaveCount(0);
+    await page.locator('[data-icon="games"]').click({ button: "right" });
+    await page.getByRole("menuitem", { name: /Pin to/ }).click();
+    await expect(page.locator('[data-dock="games"]')).toHaveCount(1);
+  });
+});
