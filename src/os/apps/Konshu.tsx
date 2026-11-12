@@ -41,7 +41,7 @@ export function KonshuAvatar({ size = 32 }: { size?: number }) {
   );
 }
 
-/** Konshu: the guide. Local answers first; Gemini for anything it doesn't know by heart. */
+/** Konshu: the guide. Local answers first; an AI model for anything it doesn't know by heart. */
 export function Konshu({ params }: AppProps) {
   const content = useContent();
   const [messages, setMessages] = useState<Message[]>(() => [
@@ -152,7 +152,7 @@ export function Konshu({ params }: AppProps) {
               )}
               {m.remote && (
                 <p className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-faint">
-                  <Sparkles size={10} /> answered with Gemini, from this site&apos;s content
+                  <Sparkles size={10} /> answered with AI, from this site&apos;s content
                 </p>
               )}
             </div>

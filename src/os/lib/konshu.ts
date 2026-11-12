@@ -75,7 +75,7 @@ const INTENTS: Intent[] = [
     id: "konshu",
     match: (q) => has(q, ["who are you", "your name", "konshu", "are you (an? )?(ai|bot|robot)"]),
     answer: () => ({
-      text: "I'm Konshu, the moon-watcher of MoonOS. I know my way around this desktop and its owner's work. For anything I don't know by heart, I ask a Gemini model, and only from what's on this site.",
+      text: "I'm Konshu, the moon-watcher of MoonOS. I know my way around this desktop and its owner's work. For anything I don't know by heart, I ask an AI model, and only from what's on this site.",
       actions: [],
     }),
   },
