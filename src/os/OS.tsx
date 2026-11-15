@@ -1,6 +1,5 @@
 "use client";
 
-import { useAutoFullscreen } from "./fullscreen";
 import { AnimatePresence, motion } from "motion/react";
 import { RECRUITER_PATH } from "./lib/resume";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -33,7 +32,6 @@ export function OS({ content }: { content: OSContent }) {
   const markBooted = useSettings((s) => s.markBooted);
   const power = usePower((s) => s.state);
   const fullBoot = usePower((s) => s.fullBoot);
-  useAutoFullscreen();
   // Phones (and phone-sized landscape screens) get the phone shell instead of a shrunken desktop.
   const isPhone = useMediaQuery(PHONE_QUERY);
   // Visitors arriving on a shared link get the short boot.

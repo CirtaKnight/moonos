@@ -1,6 +1,5 @@
 "use client";
 
-import { enterFullscreen, exitFullscreen } from "../fullscreen";
 import { useShellLayout } from "../useShellLayout";
 import { Check, Info, Monitor, RotateCcw, Volume2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -177,29 +176,22 @@ function SoundMotion() {
   const saver = useSettings((s) => s.screensaverMinutes);
   const setSaver = useSettings((s) => s.setScreensaverMinutes);
   const restoreWindows = useSettings((s) => s.restoreWindows);
-  const fullscreenPref = useSettings((s) => s.fullscreen);
-  const setFullscreenPref = useSettings((s) => s.setFullscreen);
   const setRestoreWindows = useSettings((s) => s.setRestoreWindows);
   return (
     <>
       <Group title="Windows">
-        <Toggle
-          label="Open in full screen"
-          hint="Hides the browser's bars on your first click or key press. Press Esc to leave it."
-          checked={fullscreenPref}
-          onChange={(on) => {
-            setFullscreenPref(on);
-            // This click is a user gesture, so the change can apply right away.
-            if (on) enterFullscreen();
-            else exitFullscreen();
-          }}
-        />
         <Toggle
           label="Reopen windows from my last visit"
           hint="Windows also remember where you moved and resized them."
           checked={restoreWindows}
           onChange={setRestoreWindows}
         />
+        <p className="max-w-lg text-xs text-muted">
+          For full screen, press <kbd className="rounded border border-line px-1 font-mono text-[11px]">F11</kbd> (on a Mac,{" "}
+          <kbd className="rounded border border-line px-1 font-mono text-[11px]">Ctrl</kbd> +{" "}
+          <kbd className="rounded border border-line px-1 font-mono text-[11px]">Cmd</kbd> +{" "}
+          <kbd className="rounded border border-line px-1 font-mono text-[11px]">F</kbd>).
+        </p>
       </Group>
       <Group title="Sound">
         <Toggle

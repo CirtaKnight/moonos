@@ -1,7 +1,6 @@
 "use client";
 
-import { toggleFullscreen, useFullscreen } from "../fullscreen";
-import { Bell, Maximize2, Minimize2, Search } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { useNow } from "../hooks";
 import { moonIllumination, moonPhase, moonPhaseName } from "../lib/moon";
 import { useUI } from "../store/ui";
@@ -73,7 +72,6 @@ export function TrayButton({
 export function TrayActions() {
   const panel = useUI((s) => s.panel);
   const togglePanel = useUI((s) => s.togglePanel);
-  const fullscreen = useFullscreen();
   return (
     <>
       <TrayButton label="Search (Ctrl+K)" onClick={() => togglePanel("search")} active={panel === "search"}>
@@ -82,11 +80,6 @@ export function TrayActions() {
       <TrayButton label="Notifications" onClick={() => togglePanel("notifications")} active={panel === "notifications"}>
         <Bell size={15} />
       </TrayButton>
-      {fullscreen.supported && (
-        <TrayButton label={fullscreen.active ? "Exit full screen" : "Full screen"} onClick={toggleFullscreen} active={false}>
-          {fullscreen.active ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-        </TrayButton>
-      )}
     </>
   );
 }

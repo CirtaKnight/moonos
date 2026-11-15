@@ -10,8 +10,6 @@ export type IconCell = { c: number; r: number };
 
 export interface SettingsData {
   layout: LayoutPreference;
-  /** Go fullscreen on the visitor's first click or key press. */
-  fullscreen: boolean;
   wallpaper: string;
   sound: boolean;
   reduceMotion: boolean;
@@ -36,7 +34,6 @@ export interface SettingsData {
 
 export interface SettingsState extends SettingsData {
   setLayout: (layout: LayoutPreference) => void;
-  setFullscreen: (on: boolean) => void;
   setWallpaper: (id: string) => void;
   setSound: (on: boolean) => void;
   setReduceMotion: (on: boolean) => void;
@@ -59,7 +56,6 @@ function applyToDocument(reduceMotion: boolean) {
 
 const DEFAULTS: SettingsData = {
   layout: "auto",
-  fullscreen: true,
   wallpaper: "starfield",
   sound: false,
   reduceMotion: false,
@@ -81,7 +77,6 @@ export const useSettings = create<SettingsState>()(
     (set, get) => ({
       ...DEFAULTS,
       setLayout: (layout) => set({ layout }),
-      setFullscreen: (fullscreen) => set({ fullscreen }),
       setWallpaper: (wallpaper) => set({ wallpaper }),
       setSound: (sound) => set({ sound }),
       setReduceMotion: (reduceMotion) => {
@@ -120,7 +115,6 @@ export const useSettings = create<SettingsState>()(
       },
       partialize: (s): SettingsData => ({
         layout: s.layout,
-        fullscreen: s.fullscreen,
         wallpaper: s.wallpaper,
         sound: s.sound,
         reduceMotion: s.reduceMotion,
